@@ -1,3 +1,5 @@
+# helper functions for plotting
+
 plt <- function(dat, simulation, x, y, pt_size = 1.5) {
   
   return (simulation %>%
