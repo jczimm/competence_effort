@@ -1,0 +1,16 @@
+Disclaimer: These instructions are for MacOS users (Intel only; M1 chip not supported). The RWebPPL package should also support Linux OS.
+
+The basic workflow is to install webppl first (which requires node and npm), then install the RWebPPL package.
+Step 1: Install Xcode from App Store
+Step 2: Install homebrew; https://treehouse.github.io/installation-guides/mac/homebrew
+Step 3: Install node and npm; https://treehouse.github.io/installation-guides/mac/node-mac.html
+Step 4: Install webppl. In terminal, type the following (because zsh is currently not supported):
+exec bash
+npm install -g webppl
+Step 5: Install Rwebppl. In R, type:
+devtools::install_github("mhtess/rwebppl")
+
+For more instructions, see:
+https://github.com/probmods/webppl
+https://github.com/mhtess/rwebppl
+
