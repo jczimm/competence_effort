@@ -54,7 +54,7 @@ var x1a = [], x1b = [] // arrays of strength samples
 var samples1 = Infer({ method: 'MCMC', kernel: 'MH', samples: 10000, burn: 1000, model() {
   var sa = uniform(1,10) // draw strength samples from a uniform prior
   var sb = uniform(1,10)
-  condition(outcome(sa,'box',lowR) == false) // condiition on the observations
+  condition(outcome(sa,'box',lowR) == false) // condition on the observations
   condition(outcome(sb,'box',lowR) == false)
   x1a.push(sa)
   x1b.push(sb)
