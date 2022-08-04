@@ -65,8 +65,8 @@ cor_plt2 <- function(data, x, y, ymin, ymax) {
             geom_errorbar(aes_string(ymin = ymin, ymax = ymax, width = 0)) +
             geom_point() +
             geom_abline(intercept = 0, slope = 1, lty = 3) +
-            scale_x_continuous(limits = c(0, 100), breaks = c(0,20,40,60,80,100)) +
-            scale_y_continuous(limits = c(0,100), breaks = c(0,20,40,60,80,100)) +
+            scale_x_continuous(limits = c(0, 120), breaks = c(0,20,40,60,80,100,120)) +
+            scale_y_continuous(limits = c(0,120), breaks = c(0,20,40,60,80,100,120)) +
             coord_fixed() +
             facet_grid(~model, labeller = as_labeller(c(`joint`='Joint', `solitary`='Solitary', `compensatory`='Compensatory', `maximum`='Maximum'))) +
             theme_bw() +
