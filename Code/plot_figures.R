@@ -189,7 +189,7 @@ dat3$weight <- as.factor(dat3$weight)
 counts <- table(dat3$contestant[dat3$select==1], dat3$weight[dat3$select==1])
 p <- counts/num_subject
 ci <- sqrt(p*(1-p)/num_subject)*1.96
-m <- data.frame(p) %>% mutate(contestant = Var1, weight = Var2, Var1 = NULL, Var2 = NULL)
+m <- data.frame(p) %>% rename(contestant = Var1, weight = Var2)
 
 # load simulation
 t <- read.csv('./simulation/team.csv', header = T, stringsAsFactors = T)
