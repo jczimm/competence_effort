@@ -2,7 +2,7 @@
 
 plt <- function(dat, simulation, x, y, pt_size = 1.5) {
   
-  return (simulation %>%
+  return(simulation %>%
             ggplot(aes_string(x, y, group = 'model', color = 'model')) +
             geom_line(data = simulation %>% filter(model=='maximum')) +
             geom_line(data = simulation %>% filter(model=='compensatory')) +
@@ -43,7 +43,7 @@ plt2 <- function(dat, simulation, x, y) {
 
 cor_plt <- function(data, x, y, ymin, ymax, text_data) {
   
-  return (ggplot(data, aes_string(x, y, color = 'round')) +
+  return(ggplot(data, aes_string(x, y, color = 'round')) +
             geom_errorbar(aes_string(ymin = ymin, ymax = ymax, width = 0)) +
             geom_point() +
             geom_abline(intercept = 0, slope = 1, lty = 3) +
@@ -61,7 +61,7 @@ cor_plt <- function(data, x, y, ymin, ymax, text_data) {
 
 cor_plt2 <- function(data, x, y, ymin, ymax) {
   
-  return (ggplot(data, aes_string(x, y)) +
+  return(ggplot(data, aes_string(x, y)) +
             geom_errorbar(aes_string(ymin = ymin, ymax = ymax, width = 0)) +
             geom_point() +
             geom_abline(intercept = 0, slope = 1, lty = 3) +
