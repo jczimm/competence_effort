@@ -80,7 +80,7 @@ prob_cor <- paste0('r = ',round(prob_cor,2))
 prob.text.labels <- data.frame(model = inference$model %>% unique(),
                                correlation = prob_cor,
                                x = rep(75,4),
-                               y =rep(10,4))
+                               y = rep(10,4))
 
 effort_cor <- NULL
 for (i in inference$model %>% unique()) {
@@ -90,7 +90,7 @@ effort_cor <- paste0('r = ',round(effort_cor,2))
 effort.text.labels <- data.frame(model = inference$model %>% unique(),
                                  correlation = effort_cor,
                                  x = rep(75,4),
-                                 y =rep(10,4))
+                                 y = rep(10,4))
 
 strength_cor <- NULL
 for (i in inference$model %>% unique()) {
