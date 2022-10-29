@@ -13,7 +13,6 @@ plt <- function(dat, simulation, x, y, pt_size = 1.5) {
             stat_summary(data = dat, fun.data = 'mean_cl_boot', geom = 'errorbar', width = .1) +
             stat_summary(data = dat, fun = 'mean', geom = 'point', size = pt_size) +
             scale_color_manual(name = NULL, labels = c('Data','Joint effort model','Solitary effort model','Compensatory effort model','Maximum effort model'),
-                               # values = c('#000000','#e35d5e','#1d3557','#457b9d','#9ecccc'),
                                values = c('#000000','#e35d5e','#004385','#05b2dc','#04a777'),
                                limits = c('data','joint','solitary','compensatory','maximum')) +
             theme_bw() + 
