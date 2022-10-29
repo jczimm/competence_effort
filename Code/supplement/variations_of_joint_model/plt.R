@@ -11,7 +11,6 @@ plt <- function(dat, simulation, x, y, pt_size = 1.5) {
             stat_summary(data = dat, fun.data = 'mean_cl_boot', geom = 'errorbar', width = .1) +
             stat_summary(data = dat, fun = 'mean', geom = 'point', size = pt_size) +
             scale_color_manual(name = NULL, labels = c('Data','Safe joint effort model','Joint effort model w/o Gini','Joint effort model'),
-                               # values = c('#000000','#e35d5e','#1d3557','#457b9d'),
                                values = c('#000000','#e35d5e','#004385','#05b2dc'),
                                limits = c('data','safe_joint_w_gini','joint_wo_gini','joint_w_gini')) +
             theme_bw() +
