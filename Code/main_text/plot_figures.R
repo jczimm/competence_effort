@@ -189,6 +189,8 @@ counts <- table(dat3$contestant[dat3$select==1], dat3$weight[dat3$select==1])
 p <- counts/num_subject
 ci <- sqrt(p*(1-p)/num_subject)*1.96
 m <- data.frame(p) %>% dplyr::rename(contestant = Var1, weight = Var2)
+ci_df <- data.frame(ci) %>% dplyr::rename(contestant = Var1, weight = Var2, ci = Freq)
+m <- merge(m, ci_df)
 
 # load simulation
 t <- read.csv('exp3_simulation.csv', header = T, stringsAsFactors = T)
@@ -200,7 +202,7 @@ pdf('fig7b.pdf', onefile=T, width = 7, height = 4)
 m$model <- 'data'
 
 fig7b <- plt2(m, t, 'contestant', 'Freq') +
-  geom_errorbar(data = m, aes(ymin=p-ci, ymax=p+ci), width=.1,
+  geom_errorbar(data = m, aes(ymin = Freq - ci, ymax = Freq + ci), width=.1,
                 position=position_dodge(.9)) +
   scale_y_continuous(limits = c(0,1)) +
   facet_grid(~weight)
