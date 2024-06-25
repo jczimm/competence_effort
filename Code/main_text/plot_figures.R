@@ -182,8 +182,7 @@ dev.off()
 ## Experiment 3: Team selection
 # load data
 dat3 <- read.csv('./../../Data/exp3.csv', header = T, stringsAsFactors = T)
-num_subject <- dat3 %>% select(subject) %>% unique %>% dim()
-num_subject <- num_subject[1]
+num_subject <- length(unique(dat3$subject))
 dat3$subject <- as.factor(dat3$subject)
 dat3$weight <- as.factor(dat3$weight)
 counts <- table(dat3$contestant[dat3$select==1], dat3$weight[dat3$select==1])
