@@ -1,4 +1,4 @@
 # TODO
 
-- [ ] download all the images
+- [x] download all the images
 - [ ] replace the php data-saving with DataPipe
