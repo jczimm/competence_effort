@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Lift That Box! </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="jspsych-6.1.0/jspsych.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-call-function.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-external-html.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-slider-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-multi-choice.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-multi-select.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-html-form.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-likert.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-text.js"></script>
+    <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <style>
+    .jspsych-html-button-response-button { height: 60px; width: 350px; font-size: 12px }
+    .row { display: flex; }
+    .column { flex: 50%; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; }
+    th, td { padding: 10px; }
+    #number {
+      width: 3.5em;
+    }
+    </style>
+  </head>
+  <body></body>
+  <script>
+
+  var timeline = [];
+
+  var all_images = [
+    "img3/box.png","img3/screen.png","img3/screen2.png",
+    "img3/training_ready.png","img3/training_lift.png","img3/training_fail.png",
+    "img3/box_only.png",
+    "img3/lift_together_12.png","img3/lift_together_23.png","img3/lift_together_13.png",
+    "img3/fail_single_1.png","img3/ready_single_1.png","img3/ready_single_1_select.png",
+    "img3/fail_single_2.png","img3/ready_single_2.png","img3/ready_single_2_select.png",
+    "img3/fail_single_3.png","img3/ready_single_3.png","img3/ready_single_3_select.png"
+
+  ]
+  jsPsych.pluginAPI.preloadImages(all_images, function(){ startExperiment(); });
+
+  //Consent
+  var check_consent = function(elem) {
+    if ($('#consent_checkbox').is(':checked')) { return true; }
+    else {
+      alert("If you wish to participate, you must check the box.");
+      return false;
+    }
+    return false;
+  };
+
+  var consent_block = {
+    type:'external-html',
+    url: "consent3.html",
+    cont_btn: "start",
+    check_fn: check_consent
+  };
+  timeline.push(consent_block);
+
+  var subjectId =  jsPsych.randomization.randomID(12);
+  var fullurl = window.location.href;
+  var mturkId = jsPsych.data.getURLVariable('workerId');
+  var expIndex = 'index3';
+  jsPsych.data.addProperties({
+    subjectId: subjectId,
+    url: fullurl,
+    mturkId: mturkId,
+    expIndex: expIndex
+  });
+
+  // Fullscreen
+  timeline.push({
+    type: "fullscreen",
+    message: "<p>This game must be completed in <b>full screen</b> mode to avoid distraction.</p>" +
+      "<p>You will automatically enter full screen mode when you press the button below.</p>" +
+      "<p>After entering full screen mode, please try your best to avoid exiting, switching tabs, minimizing, or adjusting the browser for the remainder of the game.</p>"+
+      "<p>To ensure quality data, please engage with the task.</p>",
+    button_label: "Enter full screen mode",
+    fullscreen_mode: true
+  });
+
+// helper
+var strength = [9, 5, 2]
+var min_incentive = [40, 20, 2]
+var box_weight = [10, 7, 6]
+var contestant_letters = [["A","B","C"],["D","E","F"],["G","H","I"]]
+jsPsych.data.addProperties({strength: strength, min_incentive: min_incentive, box_weight: box_weight})
+
+// var seq = jsPsych.randomization.shuffle([0,1,2,3,4]) // contests
+// var seq = [0,1,2,3,4,5] // contests
+// jsPsych.data.addProperties({seq: seq})
+
+// instrucions
+var instructions = {
+  type: 'instructions',
+  pages: [
+      // page 1
+      "<p style='font-size:30px'> Welcome! </p>"+
+      "<p> In this experiment, you will watch a game show called <i>Lift That Box!</i> and answer some questions. </p>"+
+      "<p> The game show consists of different contests between different teams of contestants. </p>"+
+      "<p> There are three different contestants altogether. </p>"+
+      "<p> In each contest, two of the three contestants will be given an attempt to lift a box together. </p>"+
+      "<p> <b>We will change the box at the end of each contest.</b> </p>"+
+      "<br><img src='img3/screen.png' height='250'></img>",
+      // page 2
+      "<p> <b> The weight of the box is converted onto the same scale as people's strength. </b> </p>"+
+      "<p> Suppose we rated the weights of objects on a scale of 1 to 10, <br>where 1 is a weight so light that virtually anyone can lift it, and 10 is a weight so heavy that only the strongest humans can lift it. "+
+      "<br> A box of weight 1 would be extremely easy to lift, and a box of weight 10 would be extremely hard to lift."+
+      "<br> A box of weight 5 would be liftable by an average person (strength 5) if they put in an all-out, 100% effort, <br>and an extremely strong person (strength 10) should be able to lift the box with only a moderate, 50% effort. </p>"+
+      "<br><img src='img3/box.png' height='100'></img>",
+      // page 3
+      "<p> Contestants can win a certain amount of prize money as an incentive for lifting the box. </p>"+
+      "<p> We will tell you the strength of each contestant and the minimum incentive they would accept to lift the heaviest box they can lift by themselves.</p>"+
+      "<p> Your job is to <b>select two contestants</b> to lift the box together in each contest, and <b>decide how much incentive</b> you would like to provide each contestant you selected.</p>"+
+      "<p> You will only provide incentives to the two contestants you selected. </p>"+
+      "The total incentive you can provide to the two contestants of your choice is <b> $50</b>."+
+      "<br><img src='img3/screen2.png' height='350'></img>",
+      // page 4
+      "<p> For every successful lift, you will get a bonus of $1. </p>"+
+      "<p> For every dollar of incentive you give, $0.01 will be deducted from your bonus payment, regardless of whether the result is Lift or Fail. </p>"+
+      "<p> Suppose you provide $30 to one contestant and $10 to the other contestant. <br>If they <span style='color:green'>succeed</span>, then your bonus payment increases by $1-(30+10)x$0.01 = $0.6. <br>If they <span style='color:red'>fail</span>, you lose (30+10)x$0.01 = $0.4. </p>"+
+      "<p> Your total bonus payment can go up to $3, and will also not be less than $0. </p>"+
+      "<p> You will see whether the contestants lift the box or not with the incentive you give by the end of each contest. </p>",
+      // page 5
+      "<p> Keep in mind that some people are stronger and some are weaker. </p>"+
+      "<p> The available contestants are always the same, but <b>the box changes from contest to contest</b>.</p>"+
+      "<p> The contestants know very well their own strength and the other contestant's strength. </p>"+
+      "<p> They also know how heavy the box is. </p>",
+      // page 6
+      "<p> Also remember that some contestants consider their effort more costly than others. </p>"+
+      "<p> In other words, some contestants might require more incentive to exert a certain amount of effort. </p>"+
+      "<p> <b>If the contestant does not feel the prize is worth their effort, they might not lift the box even if they are strong enough to do so.</b> </p>"+
+      // page 7
+      "<p> If you understood the rules, click 'Next' to go to the comprehension check. </p>"+
+      "<p> Otherwise, click 'Previous' to view the instructions again. </p>"+
+      "<p> If you don't get the comprehension questions correct, you can't move on. </p>"
+      ],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+var gap = {
+  type: "html-keyboard-response",
+  stimulus: " ",
+  choices: jsPsych.NO_KEYS,
+  trial_duration: 1000
+}
+
+// comprehension check
+var choices_1 = [
+  "To select two contestants in each contest and predict what incentives will motivate the two to lift the box by themselves.",
+  "To select two contestants in each contest and predict what incentives will motivate the two to lift the box together.",
+  "The goal of the game is unclear."
+];
+
+var choices_2 = [
+  "Any incentives equal to or higher than those will motivate the contestant to lift the heaviest box they can by themselves.",
+  "Those are the only incentives that a contestant will accept, whether lifting by themselves or with others.",
+  "It is unclear what minimum incentives mean."
+];
+
+var choices_3 = [
+  "The box weight is always the same, its weight equivalent to an extremely weak person's strength.",
+  "The box weight is always the same, its weight equivalent to an extremely strong person's strength.",
+  "The box weight changes from contest to contest."
+];
+
+var choices_4 = [
+  "All contestants are equally willing to put in effort.",
+  "Some contestants view their effort as more costly, and therefore require a higher incentive to exert the same amount of effort.",
+  "Lifting the box does not require any effort at all."
+];
+
+var choices_5 = [
+  "How fast I make my guesses.",
+  "I get $1 for every lift, and lose $0.01 for every dollar of incentive I give the contestants.",
+  "There is no bonus payment at all."
+];
+
+var comprehension = {
+    type: "survey-multi-choice",
+    preamble: "<p><br> The continue button is at the bottom of the page. You might need to scroll down to see it.</p>",
+    questions: [
+      {prompt: "<b>1. What is the goal of the game?</b>", options: choices_1, required: true},
+      {prompt: "<b>2. What do minimum incentives mean?</b>", options: choices_2, required: true},
+      {prompt: "<b>3. How is the box weight changing across contests?</b>", options: choices_3, required: true},
+      {prompt: "<b>4. How do different contestants respond to putting in effort?</b>", options: choices_4, required: true},
+      {prompt: "<b>5. What decides the bonus you will receive?</b>", options: choices_5, required: true}
+    ]
+  };
+
+var fail_page = {
+  type: "html-button-response",
+  stimulus: "<p> Oops! You did not pass the comprehension check.</p>",
+  choices: ['<p style="font-size: 20px"><b> Try again </b></p>', '<p style="font-size: 20px"><b> View instructions again </b></p>']
+};
+
+var fail = {
+  timeline: [fail_page],
+  conditional_function: function(){
+    var ans1 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q0;
+    var ans2 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q1;
+    var ans3 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q2;
+    var ans4 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q3;
+    var ans5 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q4;
+    if(ans1.includes('together') == false || ans2.includes('equal') == false || ans3.includes('changes') == false || ans4.includes('costly') == false || ans5.includes('lift') == false){
+      return true;
+    }
+    else {
+      return false;
+    }
+    }
+};
+
+var return_instructions = {
+  timeline: [instructions, gap],
+  conditional_function: function(){
+    var choice = jsPsych.data.getLastTrialData().values()[0].button_pressed
+    if (choice==1) {
+      return true
+    }
+    else {
+      return false
+    }
+  }
+};
+
+var comprehension_again = {
+  timeline: [comprehension],
+  conditional_function: function(){
+    try {
+    var ans1 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q0;
+    var ans2 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q1;
+    var ans3 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q2;
+    var ans4 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q3;
+    var ans5 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q4;
+    }
+    catch(err){
+      ans1 = 'undefined';
+      ans2 = 'undefined';
+      ans3 = 'undefined';
+      ans4 = 'undefined';
+      ans5 = 'undefined';
+    }
+    if(ans1.includes('together') == true && ans2.includes('equal') == true && ans3.includes('changes') == true && ans4.includes('costly') == true && ans5.includes('lift') == true){
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+};
+
+var instructions2 = {
+  type: 'instructions',
+  pages: [
+  // page 1
+  "<p> Congratulations on passing the comprehension check! </p>"+
+  "<p> Now you are about to start the game. </p>"+
+  "<p style='font-size: 20px'><b><br> Gentle Reminder </b></p>"+
+  "<p> To complete the full game and save your data, you need to advance to the completion code screen at the end of the game. </p>"+
+  "<p> Please follow the instructions on the screen carefully. </p>",
+  // page 2
+  "<p> The game will take about 10 minutes to complete.</b></p>"+ // CHANGE HERE
+  "<p> You will earn $0.5 for completing the game and a potential bonus payment up to $3.00. </p>"+ // CHANGE HERE
+  "<p> We appreciate you taking the time to complete the task to the best of your ability. </p>"
+],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+timeline.push(instructions, gap);
+timeline.push(comprehension)
+for (var i = 0; i < 100; i++) {
+  timeline.push(fail,return_instructions,comprehension_again);
+}
+timeline.push(instructions2, gap);
+
+// training
+var num_attempts = 3;
+var training_instructions = {
+  type: 'instructions',
+  pages: [
+  // page 1
+  "<p style='font-size: 30px';></b> Training </b></p>"+
+  "<p> Before we start the real contest, we would like to make sure you understand how minimum incentives are defined."+
+  "<br> We will show you a random contestant, their strength, and the minimum incentive they would accept to lift the heaviest box they can, <br> and you will have "+ num_attempts +" chances to try different incentives."+
+  "<br> Any incentive equal to or greater than the minimum incentive should get the contestant to lift the heaviest box they can lift by themselves. </p>"+
+  "<p><b> The incentives you choose in training will NOT affect your payment in any way. </b>"+
+  "<br> The training is only for you to get a better sense of how contestants respond to different incentives. </p>"
+],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+var new_attempt = {
+  type: "html-keyboard-response",
+  stimulus: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    if (a==undefined) {
+      var a = 1
+    }
+    else {
+      a += 1
+    }
+    jsPsych.data.addDataToLastTrial({a: a})
+    return " "
+  },
+  choices: jsPsych.NO_KEYS,
+  trial_duration: 100,
+  on_finish: function(){
+    var a = jsPsych.data.get().last(2).values()[0].a
+    jsPsych.data.addDataToLastTrial({a: a})
+  }
+}
+
+var contestantX = {
+  type: "survey-html-form",
+  preamble: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    return "<p style='font-size:25px'><b> Contestant X, Attempt "+ a +"/"+ num_attempts +" </b></p>"+
+    "<br> <b> Box weight: <span style='color:red'> 8 </span></b>"+
+    "<br><img src='img3/training_ready.png' height='200'></img><img src='img3/box_only.png' height='200'></img>"+
+    "<br><strong> Contestant X </strong>"+
+    "<br> Strength: <b>8</b>"+
+    "<br> Minimum incentive to lift <br>a box of weight 8 alone: <b>$32</b> </div>"
+  },
+  html: "<p> How much incentive will you give <b> Contestant X </b> to lift the box by themselves?"+
+    "<br> <b>Incentive: $<input name='box1' type='number' required max='50' min='0'></b> </p>",
+  button_label: "Next",
+  on_finish: function(){
+    var a = jsPsych.data.get().last(2).values()[0].a
+    jsPsych.data.addDataToLastTrial({a: a, Stage: "training", stage: 0})
+    var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+    if (box1 >= 32) {
+      var training_outcome = 1 // lift
+    }
+    else {
+      var training_outcome = 0 //fail
+    }
+    jsPsych.data.addDataToLastTrial({contestant: 'X', training_weight: 8, attempt: a, training_incentive: box1, training_outcome: training_outcome})
+  }
+};
+
+var contestantX_result = {
+  type: "survey-html-form",
+  preamble: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    var training_incentive = jsPsych.data.getLastTrialData().values()[0].training_incentive
+    var training_outcome = jsPsych.data.getLastTrialData().values()[0].training_outcome
+    if (training_outcome == 1) {
+      return "<p style='font-size:25px'><b> Contestant X, Attempt "+ a +"/"+ num_attempts +" </b></p>"+
+      "<br> <b> Box weight: <span style='color:red'> 8 </span></b>"+
+      "<p> Incentive you provided: $" + training_incentive +" </p>"+
+      "<img src='img3/training_lift.png' height='200'></img>"+
+      "<br><strong> Contestant X </strong>"
+    }
+    else {
+      return "<p style='font-size:25px'><b> Contestant X, Attempt "+ a +"/"+ num_attempts +" </b></p>"+
+      "<br> <b> Box weight: <span style='color:red'> 8 </span></b>"+
+      "<p> Incentive you provided: $" + training_incentive +" </p>"+
+      "<img src='img3/training_fail.png' height='200'></img>"+
+      "<br><strong> Contestant X </strong>"
+    }
+  },
+  html: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    if (a == num_attempts) {
+      return "<p> Click 'Next' to try a different box! </p>"
+    }
+    else {
+      return "<p> Click 'Next' to try a different incentive! </p>"
+    }
+  },
+  button_label: "Next",
+  on_finish: function(){
+    var a = jsPsych.data.get().last(2).values()[0].a
+    jsPsych.data.addDataToLastTrial({a: a, Stage: "training", stage: 0})
+    jsPsych.data.addDataToLastTrial({attempt: a})
+  }
+};
+
+var training_instructions2 = {
+  type: 'instructions',
+  pages: [
+  // page 1
+  "<p style='font-size: 30px';></b> Now try a lighter box! </b></p>"+
+  "<p> The box weight will now drop from 8 to 4."+
+  "<br> You will still have "+ num_attempts +" chances to try different incentives."+
+  "<br> When the box gets lighter, contestants exert less effort to lift it, therefore they would accept lower incentives."+
+  "<br> You can test how the incentive the contestant would accept changes with box weight. </p>"+
+  "<p><b> Again, the incentives you choose in training will NOT affect your payment in any way. </b>"+
+  "<br> The training is only for you to get a better sense of how contestants respond to different incentives. </p>"
+],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+var contestantX2 = {
+  type: "survey-html-form",
+  preamble: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    return "<p style='font-size:25px'><b> Contestant X, Attempt "+ a +"/"+ num_attempts +" </b></p>"+
+    "<br> <b> Box weight: <span style='color:red'> 4 </span></b>"+
+    "<br><img src='img3/training_ready.png' height='200'></img><img src='img3/box_only.png' height='200'></img>"+
+    "<br><strong> Contestant X </strong>"+
+    "<br> Strength: <b>8</b>"+
+    "<br> Minimum incentive to lift <br>a box of weight 8 alone: <b>$32</b> </div>"
+  },
+  html: "<p> How much incentive will you give <b> Contestant X </b> to lift the box by themselves?"+
+    "<br> <b>Incentive: $<input name='box1' type='number' required max='50' min='0'></b> </p>",
+  button_label: "Next",
+  on_finish: function(){
+    var a = jsPsych.data.get().last(2).values()[0].a
+    jsPsych.data.addDataToLastTrial({a: a, Stage: "training", stage: 0})
+    var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+    if (box1 >= 16) {
+      var training_outcome = 1 // lift
+    }
+    else {
+      var training_outcome = 0 //fail
+    }
+    jsPsych.data.addDataToLastTrial({contestant: 'X', training_weight: 4, attempt: a, training_incentive: box1, training_outcome: training_outcome})
+  }
+};
+
+var contestantX_result2 = {
+  type: "survey-html-form",
+  preamble: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    var training_incentive = jsPsych.data.getLastTrialData().values()[0].training_incentive
+    var training_outcome = jsPsych.data.getLastTrialData().values()[0].training_outcome
+    if (training_outcome == 1) {
+      return "<p style='font-size:25px'><b> Contestant X, Attempt "+ a +"/"+ num_attempts +" </b></p>"+
+      "<br> <b> Box weight: <span style='color:red'> 4 </span></b>"+
+      "<p> Incentive you provided: $" + training_incentive +" </p>"+
+      "<img src='img3/training_lift.png' height='200'></img>"+
+      "<br><strong> Contestant X </strong>"
+    }
+    else {
+      return "<p style='font-size:25px'><b> Contestant X, Attempt "+ a +"/"+ num_attempts +" </b></p>"+
+      "<br> <b> Box weight: <span style='color:red'> 4 </span></b>"+
+      "<p> Incentive you provided: $" + training_incentive +" </p>"+
+      "<img src='img3/training_fail.png' height='200'></img>"+
+      "<br><strong> Contestant X </strong>"
+    }
+  },
+  html: function(){
+    var a = jsPsych.data.getLastTrialData().values()[0].a
+    if (a == num_attempts) {
+      return "<p> Click 'Next' to end the training session! </p>"
+    }
+    else {
+      return "<p> Click 'Next' to try a different incentive! </p>"
+    }
+  },
+  button_label: "Next",
+  on_finish: function(){
+    var a = jsPsych.data.get().last(2).values()[0].a
+    jsPsych.data.addDataToLastTrial({a: a, Stage: "training", stage: 0})
+    jsPsych.data.addDataToLastTrial({attempt: a})
+  }
+};
+
+var training_end = {
+  type: 'instructions',
+  pages: [
+  // page 1
+  "<p> Good job! Now you will start seeing real contests. </p>"+
+  "<p> Remember that you will <b>select two contestants</b> out of three who will attempt to <b> lift the box together </b>. </p>"+
+  "<p> The bonus payment you get will depend on whether they successfully lift the box together with the incentive you choose. </p>"+
+  "<p> Click 'Next' to move on! </p>"
+],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+timeline.push(training_instructions)
+for (var i = 0; i < num_attempts; i++) {
+  timeline.push(new_attempt, contestantX, contestantX_result)
+}
+timeline.push(training_instructions2)
+for (var i = 0; i < num_attempts; i++) {
+  timeline.push(new_attempt, contestantX2, contestantX_result2)
+}
+timeline.push(training_end)
+
+// main task
+var num_contest = 3
+for (var c = 0; c < num_contest; c++) {
+
+var new_contest = {
+  type: "survey-html-form",
+  preamble: "<p style='font-size:30px'><b> Contest "+ (c+1) +"/"+num_contest+" </b></p>"+
+  "<p style='font-size:30px'> Box weight: <span style='color:red'><b> "+ box_weight[c]+"</b></span> </p>",
+  html: " ",
+  button_label: "Next"
+};
+
+var select = {
+  type: 'survey-multi-select',
+  questions: [
+    {
+      prompt: "<p style='font-size:25px'><b> Contest "+ (c+1) +"/"+num_contest+" </b></p>"+
+      "<b>Which two contestants will you pick to lift a box of <span style='color:red'> weight "+ box_weight[c]+"</span> together?</b>"+
+      "<br>Your total budget is <b> $50 </b>",
+      options: ["<div class='column'><img src='img3/ready_single_1_select.png' height='200'></img>"+
+      "<br><strong> Contestant "+ contestant_letters[c][0] +" </strong>"+
+      "<br> Strength: <b>"+strength[0]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[0]+" alone: <b>$"+min_incentive[0]+"</b> </div>",
+      "<div class='column'><img src='img3/ready_single_2_select.png' height='200'></img>"+
+      "<br><strong> Contestant "+ contestant_letters[c][1] +" </strong>"+
+      "<br> Strength: <b>"+strength[1]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[1]+" alone: <b>$"+min_incentive[1]+"</b> </div>",
+      "<div class='column'><img src='img3/ready_single_3_select.png' height='200'></img>"+
+      "<br><strong> Contestant "+ contestant_letters[c][2] +" </strong>"+
+      "<br> Strength: <b>"+strength[2]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[2]+" alone: <b>$"+min_incentive[2]+"</b> </div>"],
+      horizontal: true,
+      name: 'ready'
+    }
+  ],
+  preamble: "<p style='font-size:15px'> You have to select exactly two contestants to move on.<br> You will assign incentives on the next page. </p>",
+  on_finish: function(){
+    var choice1 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].choice1)+1;
+    var choice2 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].choice2)+1;
+    if (choice1 == 1 && choice2 == 2) {
+      var team = 12;
+    }
+    else if (choice1 == 1 && choice2 == 3) {
+      var team = 13;
+    }
+    else {
+      var team = 23;
+    }
+    jsPsych.data.addDataToLastTrial({choice1: choice1, choice2: choice2, team: team})
+    jsPsych.data.addDataToLastTrial({Stage: 'select', stage: 1})
+    var contest = jsPsych.data.get().filter({stage: 1}).select('stage').count();
+    jsPsych.data.addDataToLastTrial({contest: contest})
+    jsPsych.data.addDataToLastTrial({contestant1_strength: strength[0], contestant2_strength: strength[1], contestant3_strength: strength[2]})
+    jsPsych.data.addDataToLastTrial({contestant1_min_incentive: min_incentive[0], contestant2_min_incentive: min_incentive[1], contestant3_min_incentive: min_incentive[2]})
+    jsPsych.data.addDataToLastTrial({weight: box_weight[contest-1]})
+  }
+};
+
+var assign_trial = {
+  type: "survey-html-form",
+  preamble: function(){
+    var contest = jsPsych.data.get().filter({stage: 1}).select('stage').count();
+    var choice1 = jsPsych.data.get().filter({contest: contest, stage: 1}).select('choice1').sum()
+    var choice2 = jsPsych.data.get().filter({contest: contest, stage: 1}).select('choice2').sum()
+    return "<span style='font-size:25px'><b> Contest "+ contest +"/"+num_contest+" </b></span>"+
+    "<br> <b> Box weight: <span style='color:red'> "+ box_weight[contest-1]+"</span></b>"+
+    "<br><div class='row'>"+
+    "<div class='column' style='float: left;'><img src='img3/ready_single_"+choice1+".png' height='200'></img>"+
+    "<br><strong> Contestant "+ contestant_letters[contest-1][choice1-1] +" </strong>"+
+    "<br> Strength: <b>"+strength[choice1-1]+"</b>"+
+    "<br> Minimum incentive to lift <br>a box of weight "+strength[choice1-1]+" alone: <b>$"+min_incentive[choice1-1]+"</b>"+
+    "</div>"+
+    "<div class='column' style='float: left;'><img src='img3/box_only.png' height='200'></img>"+
+    "</div>"+
+    "<div class='column' style='float: right;'><img src='img3/ready_single_"+choice2+".png' height='200'></img>"+
+    "<br><strong> Contestant "+ contestant_letters[contest-1][choice2-1] +" </strong>"+
+    "<br> Strength: <b>"+strength[choice2-1]+"</b>"+
+    "<br> Minimum incentive to lift <br>a box of weight "+strength[choice2-1]+" alone: <b>$"+min_incentive[choice2-1]+"</b>"+
+    "</div>"+
+    "</div>"
+  },
+  html: function(){
+    var contest = jsPsych.data.get().filter({stage: 1}).select('stage').count();
+    var choice1 = jsPsych.data.get().filter({contest: contest, stage: 1}).select('choice1').sum()
+    var choice2 = jsPsych.data.get().filter({contest: contest, stage: 1}).select('choice2').sum()
+    return "<p> How much incentive will you give <b> Contestants "+ contestant_letters[contest-1][choice1-1] +" and "+ contestant_letters[contest-1][choice2-1] +" </b> each to lift the box of weight "+ box_weight[contest-1] +" together?"+
+    "<br> Your total budget is <b>$50</b>. <br>Make sure that the sum of the two incentives you enter does not exceed 50; <br>Otherwise, you will need to re-enter the numbers."+
+    "<br> <b>Incentive for Contestant "+contestant_letters[contest-1][choice1-1]+": $<input name='box1' type='number' required max='50' min='0'></b>"+
+    "<br> <b>Incentive for Contestant "+contestant_letters[contest-1][choice2-1]+": $<input name='box2' type='number' required max='50' min='0'></b> </p>"+
+    "Remember that if the contestants successfully lift the box, you get $1 bonus minus 0.01 times the incentive you provide.<br>"
+  },
+  button_label: "Next",
+  on_finish: function(){
+    var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+    var box2 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box2);
+    jsPsych.data.addDataToLastTrial({box1: box1, box2: box2})
+  }
+}
+
+var assign = {
+    timeline: [assign_trial],
+    loop_function: function(data){
+      var box1 = jsPsych.data.getLastTrialData().values()[0].box1
+      var box2 = jsPsych.data.getLastTrialData().values()[0].box2
+      if (box1 + box2 > 50) {
+          return true;
+      } else {
+          return false;
+      }
+    }
+}
+
+var reveal = {
+  type: "html-button-response",
+  stimulus: function(){
+    var contest = jsPsych.data.get().filter({stage: 1}).select('stage').count();
+    jsPsych.data.addDataToLastTrial({contest: contest, Stage: 'assign', stage: 2})
+    jsPsych.data.addDataToLastTrial({contestant1_strength: strength[0], contestant2_strength: strength[1], contestant3_strength: strength[2]})
+    jsPsych.data.addDataToLastTrial({contestant1_min_incentive: min_incentive[0], contestant2_min_incentive: min_incentive[1], contestant3_min_incentive: min_incentive[2]})
+    jsPsych.data.addDataToLastTrial({weight: box_weight[contest-1]})
+    var choice1 = jsPsych.data.get().filter({contest: contest, stage: 1}).select('choice1').sum()
+    var choice2 = jsPsych.data.get().filter({contest: contest, stage: 1}).select('choice2').sum()
+    var team = jsPsych.data.get().filter({contest: contest}).select('team').mean()
+    var strength1 = strength[choice1-1], strength2 = strength[choice2-1]
+    var alpha1 = min_incentive[choice1-1], alpha2 = min_incentive[choice2-1]
+    var incentive1 = jsPsych.data.getLastTrialData().values()[0].box1
+    var incentive2 = jsPsych.data.getLastTrialData().values()[0].box2
+    jsPsych.data.addDataToLastTrial({contest: contest, choice1: choice1, choice2: choice2, team: team, incentive1: incentive1, incentive2: incentive2})
+    if (strength1 + strength2 < box_weight[contest-1]) {
+      var outcome = 0 // Fail
+    }
+    else if (incentive2 >= alpha2) {
+      if (incentive1/alpha1*strength1 + strength2 >= box_weight[contest-1]) {
+        var outcome = 1 // Lift
+      }
+      else {
+        var outcome = 0
+      }
+    }
+    else if (incentive1 >= alpha1) {
+      if (strength1 + incentive2/alpha2*strength2 >= box_weight[contest-1]) {
+        var outcome = 1
+      }
+      else {
+        var outcome = 0
+      }
+    }
+    else {
+      if (incentive1/alpha1*strength1 + incentive2/alpha2*strength2 >= box_weight[contest-1]) {
+        var outcome = 1
+        }
+        else {
+        var outcome = 0
+      }
+    }
+    if (outcome == 1) {
+      var bonus = 1 - 0.01*(incentive1+incentive2)
+    }
+    else {
+      var bonus = 0 - 0.01*(incentive1+incentive2)
+    }
+    var bonus = Number(bonus.toFixed(2))
+    jsPsych.data.addDataToLastTrial({outcome: outcome, trial_bonus: bonus})
+    if (outcome == 0) {
+      return "<span style='font-size:25px'><b> Contest "+ contest +"/"+num_contest+" </b></span>"+
+      "<br> <b> Box weight: <span style='color:red'> "+ box_weight[contest-1]+"</span></b>"+
+      "<br><p>Incentive you provided: $"+ incentive1 + " for Contestant "+ contestant_letters[contest-1][choice1-1] +" and $"+ incentive2 + " for Contestant "+ contestant_letters[contest-1][choice2-1] +
+      "<br>The contestants failed to lift the box.</p>"+
+      "<p> You lost $" + -1*bonus + "!</p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src='img3/fail_single_"+choice1+".png' height='200'></img>"+
+      "<br><strong> Contestant "+ contestant_letters[contest-1][choice1-1] +" </strong>"+
+      "<br> Strength: <b>"+strength[choice1-1]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[choice1-1]+" alone: <b>$"+min_incentive[choice1-1]+"</b>"+
+      "</div>"+
+      "<div class='column' style='float: left;'><img src='img3/box_only.png' height='200'></img>"+
+      "</div>"+
+      "<div class='column' style='float: right;'><img src='img3/fail_single_"+choice2+".png' height='200'></img>"+
+      "<br><strong> Contestant "+ contestant_letters[contest-1][choice2-1] +" </strong>"+
+      "<br> Strength: <b>"+strength[choice2-1]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[choice2-1]+" alone: <b>$"+min_incentive[choice2-1]+"</b>"+
+      "</div>"+
+      "</div>"
+    }
+    else {
+      return "<span style='font-size:25px'><b> Contest "+ contest +"/"+num_contest+" </b></span>"+
+      "<br> <b> Box weight: <span style='color:red'> "+ box_weight[contest-1]+"</span></b>"+
+      "<br><p>Incentive you provided: $"+ incentive1 + " for Contestant "+ contestant_letters[contest-1][choice1-1] +" and $"+ incentive2 + " for Contestant "+ contestant_letters[contest-1][choice2-1] +
+      "<br>The contestants lifted the box!</p>"+
+      "<p> You earned $" + bonus + " bonus!</p>"+
+      "<img src='img3/lift_together_"+choice1+choice2+".png' height='200'></img>"+
+      "<div class='row'>"+
+      "<div class='column' style='float: left;'>"+
+      "<br><strong> Contestant "+ contestant_letters[contest-1][choice1-1] +" </strong>"+
+      "<br> Strength: <b>"+strength[choice1-1]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[choice1-1]+" alone: <b>$"+min_incentive[choice1-1]+"</b>"+
+      "</div>"+
+      "<div class='column' style='float: right;'>"+
+      "<br><strong> Contestant "+ contestant_letters[contest-1][choice2-1] +" </strong>"+
+      "<br> Strength: <b>"+strength[choice2-1]+"</b>"+
+      "<br> Minimum incentive to lift <br>a box of weight "+strength[choice2-1]+" alone: <b>$"+min_incentive[choice2-1]+"</b>"+
+      "</div>"+
+      "</div>"
+    }
+  },
+  choices: ['Next'],
+  response_ends_trial: true
+  }
+  timeline.push(new_contest,select,assign,reveal)
+}
+
+  // Comments
+  var check_understanding = {
+    type: 'survey-text',
+    questions: [{prompt: 'Please summarize the task you just completed in 1-2 sentences, so that we know you have been paying attention!', value: 'Summary', required: true}],
+    button_label: 'Submit Answer'
+  };
+  timeline.push(check_understanding)
+
+  var end_comments = {
+    type: 'survey-text',
+    questions: [{prompt: 'Optional question: We\'re always trying to improve. Please let us know if you have any comments.</br> Click \'Submit Answer\' to finish the game.', value: 'Comments'}],
+    button_label: 'Submit Answer',
+    on_finish: function(data) {
+      var interaction_data = jsPsych.data.getInteractionData();
+      data.screen = interaction_data.json();
+    }
+  };
+  timeline.push(end_comments)
+
+  // bonus
+  var display_bonus = {
+    type: "html-button-response",
+    stimulus: function(){
+      var total_bonus = jsPsych.data.get().select('trial_bonus').sum()
+      if (total_bonus < 0) {
+        var total_bonus = 0
+      }
+      var total_bonus_rounded = Number(total_bonus.toFixed(2))
+      if (total_bonus_rounded < total_bonus) {
+        total_bonus_rounded = total_bonus_rounded+0.01
+      }
+      jsPsych.data.addDataToLastTrial({total_bonus: total_bonus, total_bonus_rounded: total_bonus_rounded})
+      return  "<p> Congratulations! Your total bonus is $"+ total_bonus +"! </p>"+
+      "<p> We will round it up to $"+ total_bonus_rounded +". </p>"+
+      "<p> IMPORTANT: Please click 'Next' to complete the game.</p>"
+    },
+    choices: ['Next'],
+    response_ends_trial: true
+  };
+timeline.push(display_bonus)
+
+// Save data to CSV
+function saveData_csv(name, data){
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'save_data.php');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify({filename: name, filedata: data}));
+};
+
+// grab data before the end of the experiment
+var save_data = {
+  type: 'call-function',
+  func: function(){ saveData_csv(expIndex + '_' + subjectId + '_output', jsPsych.data.get().csv());
+  },
+  timing_post_trial: 0
+};
+timeline.push(save_data);
+
+// completion code
+var comp_code = "acattt5w8accb";
+var completion = {
+  type: 'html-keyboard-response',
+  stimulus: '<p> Your response has been recorded!</p>'+
+  '<p> Your completion code is</p>' + comp_code +
+  '<p> Please copy this code into Mechanical Turk. You will not be be able to access this code after leaving this page!</p>'+
+  '<p> No further action is necessary; you may now exit the window at any time.</p>',
+  choices: jsPsych.NO_KEYS
+};
+
+timeline.push(completion);
+
+function startExperiment(){
+  jsPsych.init({
+    timeline: timeline
+    // on_finish: function() {
+    //   jsPsych.data.get().localSave('csv','test_data.csv')
+    // }
+  });
+}
+  </script>
+</html>

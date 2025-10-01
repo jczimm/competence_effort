@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Lift That Box! </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="jspsych-6.1.0/jspsych.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-call-function.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-external-html.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-fullscreen.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-button-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-html-slider-response.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-instructions.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-multi-choice.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-html-form.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-likert.js"></script>
+    <script src="jspsych-6.1.0/plugins/jspsych-survey-text.js"></script>
+    <link href="jspsych-6.1.0/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+    <style>
+    .jspsych-html-button-response-button { height: 60px; width: 350px; font-size: 12px }
+    .row { display: flex; }
+    .column { flex: 50%; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; }
+    th, td { padding: 10px; }
+    #number {
+      width: 3.5em;
+    }
+    </style>
+  </head>
+  <body></body>
+  <script>
+
+  var timeline = [];
+
+  var all_images = [
+    "img/example1.png", "img/box.png", "img/example2.png", "img/table.png",
+    "img/lift_together_1b.png","img/lift_together_2b.png","img/lift_together_3b.png","img/lift_together_4b.png","img/lift_together_5b.png","img/lift_together_6b.png","img/box_20.png",
+    "img/fail_10_1a.png","img/fail_20_1a.png","img/fail_single_1a.png","img/lift_10_1a.png","img/lift_20_1a.png", "img/ready_20_1a.png","img/ready_single_1a.png",
+    "img/fail_10_1b.png","img/fail_20_1b.png","img/fail_single_1b.png","img/lift_10_1b.png","img/lift_20_1b.png", "img/ready_20_1b.png","img/ready_single_1b.png",
+    "img/fail_10_2a.png","img/fail_20_2a.png","img/fail_single_2a.png","img/lift_10_2a.png","img/lift_20_2a.png", "img/ready_20_2a.png","img/ready_single_2a.png",
+    "img/fail_10_2b.png","img/fail_20_2b.png","img/fail_single_2b.png","img/lift_10_2b.png","img/lift_20_2b.png", "img/ready_20_2b.png","img/ready_single_2b.png",
+    "img/fail_10_3a.png","img/fail_20_3a.png","img/fail_single_3a.png","img/lift_10_3a.png","img/lift_20_3a.png", "img/ready_20_3a.png","img/ready_single_3a.png",
+    "img/fail_10_3b.png","img/fail_20_3b.png","img/fail_single_3b.png","img/lift_10_3b.png","img/lift_20_3b.png", "img/ready_20_3b.png","img/ready_single_3b.png",
+    "img/fail_10_4a.png","img/fail_20_4a.png","img/fail_single_4a.png","img/lift_10_4a.png","img/lift_20_4a.png", "img/ready_20_4a.png","img/ready_single_4a.png",
+    "img/fail_10_4b.png","img/fail_20_4b.png","img/fail_single_4b.png","img/lift_10_4b.png","img/lift_20_4b.png", "img/ready_20_4b.png","img/ready_single_4b.png",
+    "img/fail_10_5a.png","img/fail_20_5a.png","img/fail_single_5a.png","img/lift_10_5a.png","img/lift_20_5a.png", "img/ready_20_5a.png","img/ready_single_5a.png",
+    "img/fail_10_5b.png","img/fail_20_5b.png","img/fail_single_5b.png","img/lift_10_5b.png","img/lift_20_5b.png", "img/ready_20_5b.png","img/ready_single_5b.png",
+    "img/fail_10_6a.png","img/fail_20_6a.png","img/fail_single_6a.png","img/lift_10_6a.png","img/lift_20_6a.png", "img/ready_20_6a.png","img/ready_single_6a.png",
+    "img/fail_10_6b.png","img/fail_20_6b.png","img/fail_single_6b.png","img/lift_10_6b.png","img/lift_20_6b.png", "img/ready_20_6b.png","img/ready_single_6b.png"
+  ]
+  jsPsych.pluginAPI.preloadImages(all_images, function(){ startExperiment(); });
+
+  //Consent
+  var check_consent = function(elem) {
+    if ($('#consent_checkbox').is(':checked')) { return true; }
+    else {
+      alert("If you wish to participate, you must check the box.");
+      return false;
+    }
+    return false;
+  };
+
+  var consent_block = {
+    type:'external-html',
+    url: "consent.html",
+    cont_btn: "start",
+    check_fn: check_consent
+  };
+  timeline.push(consent_block);
+
+  var subjectId =  jsPsych.randomization.randomID(12);
+  var fullurl = window.location.href;
+  var mturkId = jsPsych.data.getURLVariable('workerId');
+  var expIndex = 'index1';
+  jsPsych.data.addProperties({
+    subjectId: subjectId,
+    url: fullurl,
+    mturkId: mturkId,
+    expIndex: expIndex
+  });
+
+  // Fullscreen
+  timeline.push({
+    type: "fullscreen",
+    message: "<p>This game must be completed in <b>full screen</b> mode to avoid distraction.</p>" +
+      "<p>You will automatically enter full screen mode when you press the button below.</p>" +
+      "<p>After entering full screen mode, please try your best to avoid exiting, switching tabs, minimizing, or adjusting the browser for the remainder of the game.</p>"+
+      "<p>To ensure quality data, please engage with the task.</p>",
+    button_label: "Enter full screen mode",
+    fullscreen_mode: true
+  });
+
+// helper
+var letters = [["A","B"],["C","D"],["E","F"],["G","H"],["I","J"],["K","L"]];
+var round1_o = [[0,0], [1,1],[0,0]];
+var round2_o = [[0,0], [1,1],[1,1]];
+var round1_outcomes = [["<span style='color:red'>Fail","<span style='color:red'>Fail"], ["<span style='color:green'>Lift","<span style='color:green'>Lift"],["<span style='color:red'>Fail","<span style='color:red'>Fail"]];
+var round2_outcomes = [["<span style='color:red'>Fail","<span style='color:red'>Fail"], ["<span style='color:green'>Lift","<span style='color:green'>Lift"],["<span style='color:green'>Lift","<span style='color:green'>Lift"]];
+
+var round1_img_1 = [["img/fail_10_1a.png","img/fail_10_1b.png"], ["img/lift_10_1a.png","img/lift_10_1b.png"], ["img/fail_10_1a.png","img/fail_10_1b.png"]];
+var round2_img_1 = [["img/fail_20_1a.png","img/fail_20_1b.png"], ["img/lift_20_1a.png","img/lift_20_1b.png"], ["img/lift_20_1a.png","img/lift_20_1b.png"]];
+var round1_img_2 = [["img/fail_10_2a.png","img/fail_10_2b.png"], ["img/lift_10_2a.png","img/lift_10_2b.png"], ["img/fail_10_2a.png","img/fail_10_2b.png"]];
+var round2_img_2 = [["img/fail_20_2a.png","img/fail_20_2b.png"], ["img/lift_20_2a.png","img/lift_20_2b.png"], ["img/lift_20_2a.png","img/lift_20_2b.png"]];
+var round1_img_3 = [["img/fail_10_3a.png","img/fail_10_3b.png"], ["img/lift_10_3a.png","img/lift_10_3b.png"], ["img/fail_10_3a.png","img/fail_10_3b.png"]];
+var round2_img_3 = [["img/fail_20_3a.png","img/fail_20_3b.png"], ["img/lift_20_3a.png","img/lift_20_3b.png"], ["img/lift_20_3a.png","img/lift_20_3b.png"]];
+var round1_img_4 = [["img/fail_10_4a.png","img/fail_10_4b.png"], ["img/lift_10_4a.png","img/lift_10_4b.png"], ["img/fail_10_4a.png","img/fail_10_4b.png"]];
+var round2_img_4 = [["img/fail_20_4a.png","img/fail_20_4b.png"], ["img/lift_20_4a.png","img/lift_20_4b.png"], ["img/lift_20_4a.png","img/lift_20_4b.png"]];
+var round1_img_5 = [["img/fail_10_5a.png","img/fail_10_5b.png"], ["img/lift_10_5a.png","img/lift_10_5b.png"], ["img/fail_10_5a.png","img/fail_10_5b.png"]];
+var round2_img_5 = [["img/fail_20_5a.png","img/fail_20_5b.png"], ["img/lift_20_5a.png","img/lift_20_5b.png"], ["img/lift_20_5a.png","img/lift_20_5b.png"]];
+var round1_img_6 = [["img/fail_10_6a.png","img/fail_10_6b.png"], ["img/lift_10_6a.png","img/lift_10_6b.png"], ["img/fail_10_6a.png","img/fail_10_6b.png"]];
+var round2_img_6 = [["img/fail_20_6a.png","img/fail_20_6b.png"], ["img/lift_20_6a.png","img/lift_20_6b.png"], ["img/lift_20_6a.png","img/lift_20_6b.png"]];
+
+var round1_effort_judgment = [0,3,0]; // 0: both fail, 1: left lift, right fail, 2: left fail, right lift, 3: both lift
+var round2_effort_judgment = [0,3,3];
+
+var round3_outcomes = ["<span style='color:red'>Fail", "<span style='color:green'>Lift", "<span style='color:green'>Lift", "<span style='color:red'>Fail", "<span style='color:green'>Lift", "<span style='color:green'>Lift"];
+var round3_o = [0, 1, 1, 0, 1, 1];
+
+if (Math.random() < 0.5) {
+  round1_outcomes.push(["<span style='color:red'>Fail","<span style='color:red'>Fail"])
+  round2_outcomes.push(["<span style='color:red'>Fail","<span style='color:green'>Lift"])
+  round1_o.push([0,0])
+  round2_o.push([0,1])
+  round1_img_1.push(["img/fail_10_1a.png","img/fail_10_1b.png"])
+  round2_img_1.push(["img/fail_20_1a.png","img/lift_20_1b.png"])
+  round1_img_2.push(["img/fail_10_2a.png","img/fail_10_2b.png"])
+  round2_img_2.push(["img/fail_20_2a.png","img/lift_20_2b.png"])
+  round1_img_3.push(["img/fail_10_3a.png","img/fail_10_3b.png"])
+  round2_img_3.push(["img/fail_20_3a.png","img/lift_20_3b.png"])
+  round1_img_4.push(["img/fail_10_4a.png","img/fail_10_4b.png"])
+  round2_img_4.push(["img/fail_20_4a.png","img/lift_20_4b.png"])
+  round1_img_5.push(["img/fail_10_5a.png","img/fail_10_5b.png"])
+  round2_img_5.push(["img/fail_20_5a.png","img/lift_20_5b.png"])
+  round1_img_6.push(["img/fail_10_6a.png","img/fail_10_6b.png"])
+  round2_img_6.push(["img/fail_20_6a.png","img/lift_20_6b.png"])
+  round1_effort_judgment.push(0)
+  round2_effort_judgment.push(2)
+}
+else {
+  round1_outcomes.push(["<span style='color:red'>Fail","<span style='color:red'>Fail"])
+  round2_outcomes.push(["<span style='color:green'>Lift","<span style='color:red'>Fail"])
+  round1_o.push([0,0])
+  round2_o.push([1,0])
+  round1_img_1.push(["img/fail_10_1a.png","img/fail_10_1b.png"])
+  round2_img_1.push(["img/lift_20_1a.png","img/fail_20_1b.png"])
+  round1_img_2.push(["img/fail_10_2a.png","img/fail_10_2b.png"])
+  round2_img_2.push(["img/lift_20_2a.png","img/fail_20_2b.png"])
+  round1_img_3.push(["img/fail_10_3a.png","img/fail_10_3b.png"])
+  round2_img_3.push(["img/lift_20_3a.png","img/fail_20_3b.png"])
+  round1_img_4.push(["img/fail_10_4a.png","img/fail_10_4b.png"])
+  round2_img_4.push(["img/lift_20_4a.png","img/fail_20_4b.png"])
+  round1_img_5.push(["img/fail_10_5a.png","img/fail_10_5b.png"])
+  round2_img_5.push(["img/lift_20_5a.png","img/fail_20_5b.png"])
+  round1_img_6.push(["img/fail_10_6a.png","img/fail_10_6b.png"])
+  round2_img_6.push(["img/lift_20_6a.png","img/fail_20_6b.png"])
+  round1_effort_judgment.push(0)
+  round2_effort_judgment.push(1)
+}
+
+if (Math.random() < 0.5) {
+  round1_outcomes.push(["<span style='color:red'>Fail","<span style='color:green'>Lift"])
+  round2_outcomes.push(["<span style='color:green'>Lift","<span style='color:green'>Lift"])
+  round1_o.push([0,1])
+  round2_o.push([1,1])
+  round1_img_1.push(["img/fail_10_1a.png","img/lift_10_1b.png"])
+  round2_img_1.push(["img/lift_20_1a.png","img/lift_20_1b.png"])
+  round1_img_2.push(["img/fail_10_2a.png","img/lift_10_2b.png"])
+  round2_img_2.push(["img/lift_20_2a.png","img/lift_20_2b.png"])
+  round1_img_3.push(["img/fail_10_3a.png","img/lift_10_3b.png"])
+  round2_img_3.push(["img/lift_20_3a.png","img/lift_20_3b.png"])
+  round1_img_4.push(["img/fail_10_4a.png","img/lift_10_4b.png"])
+  round2_img_4.push(["img/lift_20_4a.png","img/lift_20_4b.png"])
+  round1_img_5.push(["img/fail_10_5a.png","img/lift_10_5b.png"])
+  round2_img_5.push(["img/lift_20_5a.png","img/lift_20_5b.png"])
+  round1_img_6.push(["img/fail_10_6a.png","img/lift_10_6b.png"])
+  round2_img_6.push(["img/lift_20_6a.png","img/lift_20_6b.png"])
+  round1_effort_judgment.push(2)
+  round2_effort_judgment.push(3)
+}
+else {
+  round1_outcomes.push(["<span style='color:green'>Lift","<span style='color:red'>Fail"])
+  round2_outcomes.push(["<span style='color:green'>Lift","<span style='color:green'>Lift"])
+  round1_o.push([1,0])
+  round2_o.push([1,1])
+  round1_img_1.push(["img/lift_10_1a.png","img/fail_10_1b.png"])
+  round2_img_1.push(["img/lift_20_1a.png","img/lift_20_1b.png"])
+  round1_img_2.push(["img/lift_10_2a.png","img/fail_10_2b.png"])
+  round2_img_2.push(["img/lift_20_2a.png","img/lift_20_2b.png"])
+  round1_img_3.push(["img/lift_10_3a.png","img/fail_10_3b.png"])
+  round2_img_3.push(["img/lift_20_3a.png","img/lift_20_3b.png"])
+  round1_img_4.push(["img/lift_10_4a.png","img/fail_10_4b.png"])
+  round2_img_4.push(["img/lift_20_4a.png","img/lift_20_4b.png"])
+  round1_img_5.push(["img/lift_10_5a.png","img/fail_10_5b.png"])
+  round2_img_5.push(["img/lift_20_5a.png","img/lift_20_5b.png"])
+  round1_img_6.push(["img/lift_10_6a.png","img/fail_10_6b.png"])
+  round2_img_6.push(["img/lift_20_6a.png","img/lift_20_6b.png"])
+  round1_effort_judgment.push(1)
+  round2_effort_judgment.push(3)
+}
+
+if (Math.random() < 0.5) {
+  round1_outcomes.push(["<span style='color:red'>Fail","<span style='color:green'>Lift"])
+  round2_outcomes.push(["<span style='color:red'>Fail","<span style='color:green'>Lift"])
+  round1_o.push([0,1])
+  round2_o.push([0,1])
+  round1_img_1.push(["img/fail_10_1a.png","img/lift_10_1b.png"])
+  round2_img_1.push(["img/fail_20_1a.png","img/lift_20_1b.png"])
+  round1_img_2.push(["img/fail_10_2a.png","img/lift_10_2b.png"])
+  round2_img_2.push(["img/fail_20_2a.png","img/lift_20_2b.png"])
+  round1_img_3.push(["img/fail_10_3a.png","img/lift_10_3b.png"])
+  round2_img_3.push(["img/fail_20_3a.png","img/lift_20_3b.png"])
+  round1_img_4.push(["img/fail_10_4a.png","img/lift_10_4b.png"])
+  round2_img_4.push(["img/fail_20_4a.png","img/lift_20_4b.png"])
+  round1_img_5.push(["img/fail_10_5a.png","img/lift_10_5b.png"])
+  round2_img_5.push(["img/fail_20_5a.png","img/lift_20_5b.png"])
+  round1_img_6.push(["img/fail_10_6a.png","img/lift_10_6b.png"])
+  round2_img_6.push(["img/fail_20_6a.png","img/lift_20_6b.png"])
+  round1_effort_judgment.push(2)
+  round2_effort_judgment.push(2)
+}
+else {
+  round1_outcomes.push(["<span style='color:green'>Lift","<span style='color:red'>Fail"])
+  round2_outcomes.push(["<span style='color:green'>Lift","<span style='color:red'>Fail"])
+  round1_o.push([1,0])
+  round2_o.push([1,0])
+  round1_img_1.push(["img/lift_10_1a.png","img/fail_10_1b.png"])
+  round2_img_1.push(["img/lift_20_1a.png","img/fail_20_1b.png"])
+  round1_img_2.push(["img/lift_10_2a.png","img/fail_10_2b.png"])
+  round2_img_2.push(["img/lift_20_2a.png","img/fail_20_2b.png"])
+  round1_img_3.push(["img/lift_10_3a.png","img/fail_10_3b.png"])
+  round2_img_3.push(["img/lift_20_3a.png","img/fail_20_3b.png"])
+  round1_img_4.push(["img/lift_10_4a.png","img/fail_10_4b.png"])
+  round2_img_4.push(["img/lift_20_4a.png","img/fail_20_4b.png"])
+  round1_img_5.push(["img/lift_10_5a.png","img/fail_10_5b.png"])
+  round2_img_5.push(["img/lift_20_5a.png","img/fail_20_5b.png"])
+  round1_img_6.push(["img/lift_10_6a.png","img/fail_10_6b.png"])
+  round2_img_6.push(["img/lift_20_6a.png","img/fail_20_6b.png"])
+  round1_effort_judgment.push(1)
+  round2_effort_judgment.push(1)
+}
+jsPsych.data.addProperties({round1_outcomes: round1_outcomes, round2_outcomes: round2_outcomes, round3_outcomes: round3_outcomes, round1_o: round1_o, round2_o: round2_o, round3_o: round3_o})
+
+var round1_imgs = [round1_img_1, round1_img_2, round1_img_3, round1_img_4, round1_img_5, round1_img_6];
+var round2_imgs = [round2_img_1, round2_img_2, round2_img_3, round2_img_4, round2_img_5, round2_img_6];
+var fail_single = [["img/fail_single_1a.png", "img/fail_single_1b.png"], ["img/fail_single_2a.png","img/fail_single_2b.png"], ["img/fail_single_3a.png","img/fail_single_3b.png"], ["img/fail_single_4a.png","img/fail_single_4b.png"], ["img/fail_single_5a.png","img/fail_single_5b.png"], ["img/fail_single_6a.png","img/fail_single_6b.png"]];
+var lift_together = ["img/lift_together_1b.png","img/lift_together_2b.png","img/lift_together_3b.png","img/lift_together_4b.png","img/lift_together_5b.png","img/lift_together_6b.png"];
+var ready_single = [["img/ready_single_1a.png","img/ready_single_1b.png"], ["img/ready_single_2a.png","img/ready_single_2b.png"], ["img/ready_single_3a.png","img/ready_single_3b.png"], ["img/ready_single_4a.png","img/ready_single_4b.png"], ["img/ready_single_5a.png","img/ready_single_5b.png"], ["img/ready_single_6a.png","img/ready_single_6b.png"]];
+var ready_20 = [["img/ready_20_1a.png","img/ready_20_1b.png"], ["img/ready_20_2a.png","img/ready_20_2b.png"], ["img/ready_20_3a.png","img/ready_20_3b.png"], ["img/ready_20_4a.png","img/ready_20_4b.png"], ["img/ready_20_5a.png","img/ready_20_5b.png"], ["img/ready_20_6a.png","img/ready_20_6b.png"]];
+
+var seq = jsPsych.randomization.shuffle([0,1,2,3,4,5]) // outcomes
+// var seq = [0,1,2,3,4,5] // outcomes
+
+// set up
+var round1_reward = 10, round2_reward = 20, round3_reward = 20;
+jsPsych.data.addProperties({round1_reward: round1_reward, round2_reward: round2_reward, round3_reward: round3_reward})
+
+// instrucions
+var instructions = {
+  type: 'instructions',
+  pages: [
+      // page 1
+      "<p style='font-size:30px'> Welcome! </p>"+
+      "<p> In this experiment, you will watch a game show called <i>Lift That Box!</i> and answer some questions. </p>"+
+      "<p> The game show consists of different contests between different pairs of contestants. </p>"+
+      "<p> In each contest, the contestants will be given <b>three attempts</b> to lift a box. </p>"+
+      "<p> We will show you whether they succeeded in lifting the box after each attempt. </p>"+
+      "<p> In the <b>final round</b> of each contest, the two contestants will try to lift the box <b>together</b>. </p>"+
+      "<img src='img/example1.png' width='1000'></img>",
+      // page 2
+      "<p> <b> The weight of the box is always the same, across all rounds and contests. </b> </p>"+
+      "<p> To give you an idea of how heavy the box is: <br>Suppose we rated the weights of objects on a scale of 1 to 10, <br>where 1 is a weight so light that virtually anyone can lift it, and 10 is a weight so heavy that only the strongest humans can lift it. <br><b>We loaded the box so that it would measure a 5 on this scale.</b> </p>"+
+      "<p> In other words: An average person (strength 5) should be able to lift the box if they put in an all-out, 100% effort, <br>and an extremely strong person (strength 10) should be able to lift the box with only a moderate, 50% effort. </p>"+
+      // "<p> The weight of the box is always <b>equivalent to half of the maximum possible strength</b>. </p>"+
+      // "<p> That is to say, if we rate strength on a 1-10 scale, where 1 is the minimum possible strength of humans, <br>and 10 is the maximum possible strength of humans, then the box weight is equivalent to a strength of 5. </p>"+
+      // "<p> A person with strength 5 exerting all of their effort would be able to lift the box. </p>"+
+      // "<p> Similarly, a person with strength 10 exerting 50% of their effort would be able to lift the box. </p>"+
+      "<br><img src='img/box.png' height='100'></img>",
+      // page 3
+      "<p> Contestants can win <b>$10</b> or <b>$20</b> for lifting the box, as indicated on the box. </p>"+
+      "<p> In the final round, if they lift the box together, <b>each of them gets the prize money</b> shown on the box. </p>"+
+      "<p> The prizes change from round to round, but the box doesn't change. </p>"+
+      "<img src='img/example2.png' width='1000'></img>",
+      // page 4
+      "<p> You will predict how likely the contestants are to lift the box, observe the actual outcome, <br>and answer questions regarding their strength and effort. </p>"+
+      "<p> When making your guesses, you will see a table of all the previous outcomes. </p>"+
+      "<p> By the end of the game, we will randomly pick a round to calculate your bonus. </p>"+
+      "<p> If the outcome on that round is <span style='color:green'>Lift</span>, then your bonus will be the probability of lifting that you guessed. </p>"+
+      "<p> If the outcome on that round is <span style='color:red'>Fail</span>, then your bonus will be 1 minus the probability of lifting that you guessed. </p>"+
+      "<img src='img/table.png' width='200'></img>",
+      // page 5
+      "<p> Keep in mind that some people are stronger and some are weaker. </p>"+
+      "<p> Even two contestants with the same strength may have different outcomes <br>(some people are lazier and need higher reward to do the same thing!). </p>"+
+      "<p> The contestants know very well their own strength and the other contestant's strength. </p>"+
+      "<p> They also know how heavy the box is. </p>",
+      // page 6
+      "<p> Also remember that <b>the box is always the same</b>. </p>"+
+      "<p> Different pairs of contestants will come in to lift the box; <br>each pair will play the game for three consecutive rounds. </p>"+
+      "<p> <b>If the contestant does not feel the prize is worth their effort, they might not lift the box even if they are strong enough to do so.</b> </p>"+
+      "<p> <b>Note that <u>effort is costly</u>; If the contestant can lift the box with 50% effort, they would not exert more effort than needed.</b> </p>",
+      // page 7
+      "<p> If you understood the rules, click 'Next' to go to the comprehension check. </p>"+
+      "<p> Otherwise, click 'Previous' to view the instructions again. </p>"+
+      "<p> If you don't get the comprehension questions correct, you can't move on. </p>"
+      ],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+var gap = {
+  type: "html-keyboard-response",
+  stimulus: " ",
+  choices: jsPsych.NO_KEYS,
+  trial_duration: 1000
+}
+
+// comprehension check
+
+var choices_1 = [
+  "It consists of multiple contests, each contest with one round.",
+  "It consists of multiple contests, each contest with three rounds.",
+  "The structure of the game show is unclear."
+];
+
+var choices_2 = [
+  "When a new contest begins.",
+  "When a new round starts.",
+  "Contestants are always the same across contests."
+];
+
+var choices_3 = [
+  "The box weight changes across contests, but not across rounds within each contest.",
+  "The box weight changes according to the reward on the box; the higher the reward, the heavier the box.",
+  "The box weight always stays the same (equivalent to strength of 5)."
+];
+
+var choices_4 = [
+  "They will split the $20, that is $10 for each.",
+  "Each will get $20.",
+  "They will split the $20 unevenly proportional to strength."
+];
+
+var choices_5 = [
+  "How close my guesses are to the actual outcome.",
+  "How fast I make my guesses.",
+  "There is no bonus payment at all."
+];
+
+var comprehension = {
+    type: "survey-multi-choice",
+    preamble: "<p><br> The continue button is at the bottom of the page. You might need to scroll down to see it.</p>",
+    questions: [
+      {prompt: "<b>1. What is the structure of the game show?</b>", options: choices_1, required: true},
+      {prompt: "<b>2. When do contestants change?</b>", options: choices_2, required: true},
+      {prompt: "<b>3. How is the box weight changing across rounds and contests?</b>", options: choices_3, required: true},
+      {prompt: "<b>4. How much will the contestants get from lifting the box together in the final round (reward on the box is $20)?</b>", options: choices_4, required: true},
+      {prompt: "<b>5. What decides the bonus you will receive?</b>", options: choices_5, required: true}
+    ]
+  };
+
+var fail_page = {
+  type: "html-button-response",
+  stimulus: "<p> Oops! You did not pass the comprehension check.</p>",
+  choices: ['<p style="font-size: 20px"><b> Try again </b></p>', '<p style="font-size: 20px"><b> View instructions again </b></p>']
+};
+
+var fail = {
+  timeline: [fail_page],
+  conditional_function: function(){
+    var ans1 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q0;
+    var ans2 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q1;
+    var ans3 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q2;
+    var ans4 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q3;
+    var ans5 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q4;
+    if(ans1.includes('three') == false || ans2.includes('begins') == false || ans3.includes('same') == false || ans4.includes('get') == false || ans5.includes('close') == false){
+      return true;
+    }
+    else {
+      return false;
+    }
+    }
+};
+
+var return_instructions = {
+  timeline: [instructions, gap],
+  conditional_function: function(){
+    var choice = jsPsych.data.getLastTrialData().values()[0].button_pressed
+    if (choice==1) {
+      return true
+    }
+    else {
+      return false
+    }
+  }
+};
+
+var comprehension_again = {
+  timeline: [comprehension],
+  conditional_function: function(){
+    try {
+    var ans1 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q0;
+    var ans2 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q1;
+    var ans3 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q2;
+    var ans4 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q3;
+    var ans5 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q4;
+    }
+    catch(err){
+      ans1 = 'undefined';
+      ans2 = 'undefined';
+      ans3 = 'undefined';
+      ans4 = 'undefined';
+      ans5 = 'undefined';
+    }
+    if(ans1.includes('three') == true && ans2.includes('begins') == true && ans3.includes('same') == true && ans4.includes('get') == true && ans5.includes('close') == true){
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+};
+
+var instructions2 = {
+  type: 'instructions',
+  pages: [
+  // page 1
+  "<p> Congratulations on passing the comprehension check! </p>"+
+  "<p> Now you are about to start the game. </p>"+
+  "<p style='font-size: 20px'><b><br> Gentle Reminder </b></p>"+
+  "<p> To complete the full game and save your data, you need to advance to the completion code screen at the end of the game. </p>"+
+  "<p> Please follow the instructions on the screen carefully. </p>"+
+  "<p> <b>There are a few attention checks throughout the game; your HIT may be rejected if you fail them.</b> </p>",
+  // page 2
+  "<p> The game will take about 15 minutes to complete.</b></p>"+ // CHANGE HERE
+  "<p> You will earn $2 for completing the game and a potential bonus payment up to $1.00. </p>"+ // CHANGE HERE
+  "<p> We appreciate you taking the time to complete the task to the best of your ability. </p>"
+],
+  show_clickable_nav: true,
+  allow_backward: true
+};
+
+timeline.push(instructions, gap);
+timeline.push(comprehension)
+for (var i = 0; i < 100; i++) {
+  timeline.push(fail,return_instructions,comprehension_again);
+}
+timeline.push(instructions2, gap);
+
+// main task
+var new_contest = {
+  type: "html-keyboard-response",
+  stimulus: function(){
+    var j = jsPsych.data.getLastTrialData().values()[0].j
+    if (j==undefined) {
+      var j = 1
+    }
+    else {
+      j += 1
+    }
+    jsPsych.data.addDataToLastTrial({j: j})
+    return "<p style='font-size:30px'><b> New Contest! </b></p>"
+  },
+  choices: jsPsych.NO_KEYS,
+  trial_duration: 3000,
+  on_finish: function(){
+    var j = jsPsych.data.get().last(2).values()[0].j
+    jsPsych.data.addDataToLastTrial({j: j})
+  }
+}
+
+  var round1_outcome = {
+    type: "survey-html-form",
+    preamble: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p style='font-size:25px'><b> Contest "+ j +", Round 1 </b></p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src="+ round1_imgs[j-1][seq[j-1]][0] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][0] +" </strong></div>"+
+      "<div class='column' style='float: left;'><img src="+ round1_imgs[j-1][seq[j-1]][1] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][1] +" </strong></div>"+
+      "<div class='column' style='float: right;'> <pre>   </pre> </div>"+
+      "<div class='column' style='float: right;'><table>"+
+      "<tr><th> Contestant </th><th> "+ letters[j-1][0] +" </th><th> "+ letters[j-1][1] +" </th></tr>"+
+      "<tr><th> Round 1 ($"+ round1_reward +") </th><td> <b>"+ round1_outcomes[seq[j-1]][0] +" </span></b> </td><td> <b>"+ round1_outcomes[seq[j-1]][1] +" </span></b> </td></tr>"+
+      "<tr><th> Round 2 </td><td> &nbsp; </td><td> &nbsp; </td></tr>"+
+      "<tr><th> Round 3 </td><td colspan='2'> &nbsp; </td></tr>"+
+      "</table></div>"+
+      "</div>"
+    },
+    html: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      if (round1_effort_judgment[seq[j-1]] == 0) {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"
+      }
+      else if (round1_effort_judgment[seq[j-1]] == 1) {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+        "<p><b> Q2:</b> How much effort do you think each contestant "+ letters[j-1][0] +" put into lifting?"+
+        "<br> Effort of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box3' type='number' required max='100' min='0'>% </p>"
+      }
+      else if (round1_effort_judgment[seq[j-1]] == 2) {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+        "<p><b> Q2:</b> How much effort do you think contestant "+ letters[j-1][1] +" put into lifting?"+
+        "<br> Effort of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box4' type='number' required max='100' min='0'>% </p>"
+      }
+      else {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+        "<p><b> Q2:</b> How much effort do you think each contestant put into lifting?"+
+        "<br> Effort of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box3' type='number' required max='100' min='0'>%, Effort of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box4' type='number' required max='100' min='0'>% </p>"
+      }
+    },
+    button_label: "Next",
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({j: j, Stage: "round1_outcome", stage: 1})
+      var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+      var box2 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box2);
+      var box3 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box3);
+      var box4 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box4);
+      jsPsych.data.addDataToLastTrial({contest: j, round: 1, strength_a: box1, strength_b: box2, effort_a: box3, effort_b: box4, outcome_a: round1_o[seq[j-1]][0], outcome_b: round1_o[seq[j-1]][1], reward: round1_reward})
+      jsPsych.data.addDataToLastTrial({r1_strength_a: box1, r1_strength_b: box2, r1_effort_a: box3, r1_effort_b: box4, r1_outcome_a: round1_o[seq[j-1]][0], r1_outcome_b: round1_o[seq[j-1]][1], r1_reward: round1_reward})
+    }
+  };
+
+  var round2_ready = {
+    type: "survey-html-form",
+    preamble: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p style='font-size:25px'><b> Contest "+ j +", Round 2 </b></p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src="+ ready_20[j-1][0] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][0] +" </strong></div>"+
+      "<div class='column' style='float: left;'><img src="+ ready_20[j-1][1] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][1] +" </strong></div>"+
+      "<div class='column' style='float: right;'> <pre>   </pre> </div>"+
+      "<div class='column' style='float: right;'><table>"+
+      "<tr><th> Contestant </th><th> "+ letters[j-1][0] +" </th><th> "+ letters[j-1][1] +" </th></tr>"+
+      "<tr><th> Round 1 ($"+ round1_reward +") </th><td> "+ round1_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round1_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 2 ($"+ round2_reward +") </td><td> ? </td><td> ? </td></tr>"+
+      "<tr><th> Round 3 </td><td colspan='2'> &nbsp; </td></tr>"+
+      "</table></div>"+
+      "</div>"
+    },
+    html: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p><b> Q1:</b> How likely do you think <b>Contestant "+ letters[j-1][0] +"</b> will lift the box?"+
+      "<br> Probability of lifting: <input name='box1' type='number' required max='100' min='0'>% </p>"+
+      "<p><b> Q2:</b> How likely do you think <b>Contestant "+ letters[j-1][1] +"</b> will lift the box?"+
+      "<br> Probability of lifting: <input name='box2' type='number' required max='100' min='0'>% </p>"
+    },
+    button_label: "Next",
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({j: j, Stage: "round2_ready", stage: 2})
+      var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+      var box2 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box2);
+      jsPsych.data.addDataToLastTrial({contest: j, round: 2, probability_a: box1, probability_b: box2})
+      jsPsych.data.addDataToLastTrial({r2_prob_a: box1, r2_prob_b: box2})
+    }
+  };
+
+  var round2_outcome = {
+    type: "survey-html-form",
+    preamble: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p style='font-size:25px'><b> Contest "+ j +", Round 2 </b></p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src="+ round2_imgs[j-1][seq[j-1]][0] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][0] +" </strong></div>"+
+      "<div class='column' style='float: left;'><img src="+ round2_imgs[j-1][seq[j-1]][1] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][1] +" </strong></div>"+
+      "<div class='column' style='float: right;'> <pre>   </pre> </div>"+
+      "<div class='column' style='float: right;'><table>"+
+      "<tr><th> Contestant </th><th> "+ letters[j-1][0] +" </th><th> "+ letters[j-1][1] +" </th></tr>"+
+      "<tr><th> Round 1 ($"+ round1_reward +") </th><td> "+ round1_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round1_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 2 ($"+ round2_reward +") </td><td> <b>"+ round2_outcomes[seq[j-1]][0] +" </span></b> </td><td> <b>"+ round2_outcomes[seq[j-1]][1] +" </span></b> </td></tr>"+
+      "<tr><th> Round 3 </td><td colspan='2'> &nbsp; </td></tr>"+
+      "</table></div>"+
+      "</div>"
+    },
+    html: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      if (round2_effort_judgment[seq[j-1]] == 0) {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"
+      }
+      else if (round2_effort_judgment[seq[j-1]] == 1) {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+        "<p><b> Q2:</b> How much effort do you think each contestant "+ letters[j-1][0] +" put into lifting?"+
+        "<br> Effort of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box3' type='number' required max='100' min='0'>% </p>"
+      }
+      else if (round2_effort_judgment[seq[j-1]] == 2) {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+        "<p><b> Q2:</b> How much effort do you think contestant "+ letters[j-1][1] +" put into lifting?"+
+        "<br> Effort of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box4' type='number' required max='100' min='0'>% </p>"
+      }
+      else {
+        return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+        "<br> 1 means extremely weak, 10 means extremely strong."+
+        "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+        "<p><b> Q2:</b> How much effort do you think each contestant put into lifting?"+
+        "<br> Effort of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box3' type='number' required max='100' min='0'>%, Effort of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box4' type='number' required max='100' min='0'>% </p>"
+      }
+    },
+    button_label: "Next",
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({j: j, Stage: "round2_outcome", stage: 3})
+      var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+      var box2 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box2);
+      var box3 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box3);
+      var box4 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box4);
+      jsPsych.data.addDataToLastTrial({contest: j, round: 2, strength_a: box1, strength_b: box2, effort_a: box3, effort_b: box4, outcome_a: round2_o[seq[j-1]][0], outcome_b: round2_o[seq[j-1]][1], reward: round2_reward})
+      jsPsych.data.addDataToLastTrial({r2_strength_a: box1, r2_strength_b: box2, r2_effort_a: box3, r2_effort_b: box4, r2_outcome_a: round2_o[seq[j-1]][0], r2_outcome_b: round2_o[seq[j-1]][1], r2_reward: round2_reward})
+    }
+  };
+
+  var round3_ready = {
+    type: "survey-html-form",
+    preamble: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p style='font-size:25px'><b> Contest "+ j +", Round 3 </b></p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src="+ ready_single[j-1][0] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][0] +" </strong></div>"+
+      "<div class='column' style='float: left;'><img src='img/box_20.png' height='300'></img></div>"+
+      "<div class='column' style='float: left;'><img src="+ ready_single[j-1][1] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][1] +" </strong></div>"+
+      "<div class='column' style='float: right;'> <pre>   </pre> </div>"+
+      "<div class='column' style='float: right;'><table>"+
+      "<tr><th> Contestant </th><th> "+ letters[j-1][0] +" </th><th> "+ letters[j-1][1] +" </th></tr>"+
+      "<tr><th> Round 1 ($"+ round1_reward +") </th><td> "+ round1_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round1_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 2 ($"+ round2_reward +") </td><td> "+ round2_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round2_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 3 ($"+ round3_reward +" for each) </td><td colspan='2'> ? </td></tr>"+
+      "</table></div>"+
+      "</div>"
+    },
+    html: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p><b> Q1:</b> How likely do you think <b> Contestants "+ letters[j-1][0] +" and "+ letters[j-1][1] +" </b> will lift the box together?"+
+      "<br> Probability of lifting: <input name='box1' type='number' required max='100' min='0'>% </p>"
+    },
+    button_label: "Next",
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({j: j, Stage: "round3_ready", stage: 4})
+      var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+      jsPsych.data.addDataToLastTrial({contest: j, round: 3, probability_a: box1, probability_b: box1})
+      jsPsych.data.addDataToLastTrial({r3_prob_a: box1, r3_prob_b: box1})
+    }
+  };
+
+  var round3_lift_trial = {
+    type: "survey-html-form",
+    preamble: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p style='font-size:25px'><b> Contest "+ j +", Round 3 </b></p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src="+ lift_together[j-1] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][0] +" </strong> and <strong> Contestant "+ letters[j-1][1] +" </strong></div>"+
+      "<div class='column' style='float: right;'> <pre>          </pre> </div>"+
+      "<div class='column' style='float: right;'><table>"+
+      "<tr><th> Contestant </th><th> "+ letters[j-1][0] +" </th><th> "+ letters[j-1][1] +" </th></tr>"+
+      "<tr><th> Round 1 ($"+ round1_reward +") </th><td> "+ round1_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round1_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 2 ($"+ round2_reward +") </td><td> "+ round2_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round2_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 3 ($"+ round3_reward +" <br> for each) </td><td colspan='2'> <b><span style='color:green'> Lift </span></b> </td></tr>"+
+      "</table></div>"+
+      "</div>"
+    },
+    html: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+      "<br> 1 means extremely weak, 10 means extremely strong."+
+      "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+      "<p><b> Q2:</b> How much effort do you think each contestant put into lifting?"+
+      "<br> Effort of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box3' type='number' required max='100' min='0'>%, Effort of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box4' type='number' required max='100' min='0'>% </p>"
+    },
+    button_label: "Next",
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({j: j, Stage: "round3_lift", stage: 5})
+      var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+      var box2 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box2);
+      var box3 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box3);
+      var box4 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box4);
+      jsPsych.data.addDataToLastTrial({contest: j, round: 3, strength_a: box1, strength_b: box2, effort_a: box3, effort_b: box4, outcome_a: 1, outcome_b: 1, reward: round3_reward})
+      jsPsych.data.addDataToLastTrial({r3_strength_a: box1, r3_strength_b: box2, r3_effort_a: box3, r3_effort_b: box4, r3_outcome_a: 1, r3_outcome_b: 1, r3_reward: round3_reward})
+    }
+  };
+
+  var round3_fail_trial = {
+    type: "survey-html-form",
+    preamble: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p style='font-size:25px'><b> Contest "+ j +", Round 3 </b></p>"+
+      "<br><div class='row'>"+
+      "<div class='column' style='float: left;'><img src="+ fail_single[j-1][0] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][0] +" </strong></div>"+
+      "<div class='column' style='float: left;'><img src='img/box_20.png' height='300'></img></div>"+
+      "<div class='column' style='float: left;'><img src="+ fail_single[j-1][1] +" height='300'></img>"+
+      "<br><strong> Contestant "+ letters[j-1][1] +" </strong></div>"+
+      "<div class='column' style='float: right;'> <pre>   </pre> </div>"+
+      "<div class='column' style='float: right;'><table>"+
+      "<tr><th> Contestant </th><th> "+ letters[j-1][0] +" </th><th> "+ letters[j-1][1] +" </th></tr>"+
+      "<tr><th> Round 1 ($"+ round1_reward +") </th><td> "+ round1_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round1_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 2 ($"+ round2_reward +") </td><td> "+ round2_outcomes[seq[j-1]][0] +" </span> </td><td> "+ round2_outcomes[seq[j-1]][1] +" </span> </td></tr>"+
+      "<tr><th> Round 3 ($"+ round3_reward +" for each) </td><td colspan='2'> <b><span style='color:red'> Fail </span></b> </td></tr>"+
+      "</table></div>"+
+      "</div>"
+    },
+    html: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      return "<p><b> Q1:</b> How strong do you think each contestant is, on a scale of 1-10?"+
+      "<br> 1 means extremely weak, 10 means extremely strong."+
+      "<br> Strength of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box1' type='number' required max='10' min='1'>, Strength of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box2' type='number' required max='10' min='1'> </p>"+
+      "<p><b> Q2:</b> This question is an attention check. Enter 999 for both contestants' effort."+
+      "<br> Effort of <b> Contestant "+ letters[j-1][0] +" </b>: <input name='box3' type='number' required max='1000' min='0'>%, Effort of <b> Contestant "+ letters[j-1][1] +" </b>: <input name='box4' type='number' required max='1000' min='0'>% </p>"
+    },
+    button_label: "Next",
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({j: j, Stage: "round3_fail", stage: 5})
+      var box1 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box1);
+      var box2 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box2);
+      var box3 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box3);
+      var box4 = Number(JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).box4);
+      if (box3 == 999 && box4 == 999) {
+          var attention_check = 1 // pass
+      }
+      else {
+        var attention_check = 0 // fail
+      }
+      jsPsych.data.addDataToLastTrial({contest: j, round: 3, strength_a: box1, strength_b: box2, attention_check: attention_check, outcome_a: 0, outcome_b: 0, reward: round3_reward, count: 1})
+      jsPsych.data.addDataToLastTrial({r3_strength_a: box1, r3_strength_b: box2, r3_outcome_a: 0, r3_outcome_b: 0, r3_reward: round3_reward})
+    }
+  };
+
+  var round3_lift = {
+    timeline: [round3_lift_trial],
+    conditional_function: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      if (round3_o[seq[j-1]] == 1) {
+        return true
+      }
+      else {
+        return false
+      }
+    }
+  }
+
+  var round3_fail = {
+    timeline: [round3_fail_trial],
+    conditional_function: function(){
+      var j = jsPsych.data.getLastTrialData().values()[0].j
+      if (round3_o[seq[j-1]] == 0) {
+        return true
+      }
+      else {
+        return false
+      }
+    }
+  }
+
+  var warning = {
+    type: "html-keyboard-response",
+    stimulus: "<p> <b>Oops you failed an attention check!</b> </p>"+
+    "<p> <b>We will have to reject your HIT if you fail another one.</b> </p>"+
+    "<p> <b>Please pay more attention!</b> </p>",
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 5000,
+    on_finish: function(){
+      var j = jsPsych.data.get().last(2).values()[0].j
+      jsPsych.data.addDataToLastTrial({already: 1, j: j, Stage: "warning"})
+    }
+  }
+
+  var fail_once = {
+    timeline: [warning],
+    conditional_function: function(){
+      var already = jsPsych.data.get().filter({Stage: "warning"}).select('already').sum();
+      var count = jsPsych.data.get().filter({Stage: "round3_fail"}).select('count').sum();
+      var attention = jsPsych.data.get().filter({Stage: "round3_fail"}).select('attention_check').sum();
+      if (count == 1 && attention == 0 && already != 1) {
+        return true
+      }
+      else if (count == 2 && attention == 1 && already != 1) {
+        return true
+      }
+      else {
+        return false
+      }
+    }
+  }
+
+  var termination = {
+    type: "html-keyboard-response",
+    stimulus: "<p> <b>We are sorry that you failed all of our attention checks.</b> </p>"+
+    "<p> We will have to reject your HIT. </p>"+
+    "<p> If you do not want wish to be rejected, you can choose not to submit the HIT. </p>"+
+    "<p> Thank you for your time! </p>",
+    choices: jsPsych.NO_KEYS
+  }
+
+  var fail_twice = {
+    timeline: [termination],
+    conditional_function: function(){
+      var count = jsPsych.data.get().filter({Stage: "round3_fail"}).select('count').sum();
+      var attention = jsPsych.data.get().filter({Stage: "round3_fail"}).select('attention_check').sum();
+      if (count == 2 && attention == 0) {
+        return true
+      }
+      else {
+        return false
+      }
+    }
+  }
+
+  for (var i = 0; i < 6; i++) {
+    timeline.push(new_contest, round1_outcome, round2_ready, round2_outcome, round3_ready, round3_lift, round3_fail, fail_once, fail_twice)
+  }
+
+  // Comments
+  var check_understanding = {
+    type: 'survey-text',
+    questions: [{prompt: 'Please summarize the task you just completed in 1-2 sentences, so that we know you have been paying attention!', value: 'Summary', required: true}],
+    button_label: 'Submit Answer'
+  };
+  timeline.push(check_understanding)
+
+  var end_comments = {
+    type: 'survey-text',
+    questions: [{prompt: 'Optional question: We\'re always trying to improve. Please let us know if you have any comments.</br> Click \'Submit Answer\' to finish the game.', value: 'Comments'}],
+    button_label: 'Submit Answer',
+    on_finish: function(data) {
+      var interaction_data = jsPsych.data.getInteractionData();
+      data.screen = interaction_data.json();
+    }
+  };
+  timeline.push(end_comments)
+
+  // bonus
+  var display_bonus = {
+    type: "html-button-response",
+    stimulus: function(){
+      var pick_contest = jsPsych.randomization.sampleWithReplacement([1,2,3,4,5,6],1)[0];
+      var pick_round = jsPsych.randomization.sampleWithReplacement([2,3],1)[0];
+      if (pick_round == 2) {
+        var pick_side = jsPsych.randomization.sampleWithReplacement([0,1],1)[0];
+        if (pick_side == 0) {
+          var trial_probability = jsPsych.data.get().filter({contest: pick_contest, round: pick_round, stage: 2}).select('probability_a').sum();
+          var trial_outcome = jsPsych.data.get().filter({contest: pick_contest, round: pick_round, stage: 3}).select('outcome_a').sum();
+        }
+        else {
+          var trial_probability = jsPsych.data.get().filter({contest: pick_contest, round: pick_round, stage: 2}).select('probability_b').sum();
+          var trial_outcome = jsPsych.data.get().filter({contest: pick_contest, round: pick_round, stage: 3}).select('outcome_b').sum();
+        }
+      }
+      else {
+        var trial_probability = jsPsych.data.get().filter({contest: pick_contest, round: pick_round, stage: 4}).select('probability_a').sum();
+        var trial_outcome = jsPsych.data.get().filter({contest: pick_contest, round: pick_round, stage: 5}).select('outcome_a').sum();
+      }
+      var bonus = (trial_outcome*trial_probability + (1-trial_outcome)*(100-trial_probability))/100;
+      jsPsych.data.addDataToLastTrial({pick_contest: pick_contest, pick_round: pick_round, pick_side: pick_side, trial_probability: trial_probability, trial_outcome: trial_outcome, bonus: bonus})
+
+      if (pick_round == 2) {
+        if (pick_side == 0) {
+        return  "<p> We randomly picked <b>Contest "+ pick_contest +", Round "+ pick_round +"</b> to calculate your bonus. </p>"+
+        "<p> The outcome of Contestant "+ letters[pick_contest-1][0] +" on that round is "+ round2_outcomes[seq[pick_contest-1]][0] +"</span>. </p>"+
+        "<p> The probability you entered was "+ trial_probability +". </p>"+
+        "<p><b> You won a bonus of $"+ bonus +"!</b></p>"+
+        "<p> IMPORTANT: Please click 'Next' to complete the game.</p>"
+        }
+        else {
+          return  "<p> We randomly picked <b>Contest "+ pick_contest +", Round "+ pick_round +"</b> to calculate your bonus. </p>"+
+          "<p> The outcome of Contestant "+ letters[pick_contest-1][1] +" on that round is "+ round2_outcomes[seq[pick_contest-1]][1] +"</span>. </p>"+
+          "<p> The probability you entered was "+ trial_probability +". </p>"+
+          "<p><b> You won a bonus of $"+ bonus +"!</b></p>"+
+          "<p> IMPORTANT: Please click 'Next' to complete the game.</p>"
+        }
+      }
+      else {
+        return  "<p> We randomly picked <b>Contest "+ pick_contest +", Round "+ pick_round +"</b> to calculate your bonus. </p>"+
+        "<p> The outcome of Contestant "+ letters[pick_contest-1][0] +" and "+ letters[pick_contest-1][1] +" on that round is "+ round3_outcomes[seq[pick_contest-1]] +"</span>. </p>"+
+        "<p> The probability you entered was "+ trial_probability +". </p>"+
+        "<p><b> You won a bonus of $"+ bonus +"!</b></p>"+
+        "<p> IMPORTANT: Please click 'Next' to complete the game. </p>"
+      }
+  },
+    choices: ['Next'],
+    response_ends_trial: true,
+    on_finish: function(data) {
+      var attention_sum = jsPsych.data.get().filter({Stage: "round3_fail"}).select('attention_check').sum();
+      if (attention_sum == 2) {
+        var attention = 1
+      }
+      else {
+        var attention = 0
+      }
+      jsPsych.data.addDataToLastTrial({attention_sum: attention_sum, attention: attention})
+    }
+  };
+timeline.push(display_bonus)
+
+// Save data to CSV
+function saveData_csv(name, data){
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'save_data.php');
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.send(JSON.stringify({filename: name, filedata: data}));
+};
+
+// grab data before the end of the experiment
+var save_data = {
+  type: 'call-function',
+  func: function(){ saveData_csv(expIndex + '_' + subjectId + '_output', jsPsych.data.get().csv());
+  },
+  timing_post_trial: 0
+};
+timeline.push(save_data);
+
+// completion code
+var comp_code = "acattt5w8accb";
+var completion_trial = {
+  type: 'html-keyboard-response',
+  stimulus: '<p> Your response has been recorded!</p>'+
+  '<p> Your completion code is</p>' + comp_code +
+  '<p> Please copy this code into Mechanical Turk. You will not be be able to access this code after leaving this page!</p>'+
+  '<p> No further action is necessary; you may now exit the window at any time.</p>',
+  choices: jsPsych.NO_KEYS
+};
+
+var comp_code_fail1 = "1acattt5w8accb";
+var completion_fail1_trial = {
+  type: 'html-keyboard-response',
+  stimulus: '<p> Your response has been recorded!</p>'+
+  '<p> Your completion code is</p>' + comp_code_fail1 +
+  '<p> Please copy this code into Mechanical Turk. You will not be be able to access this code after leaving this page!</p>'+
+  '<p> No further action is necessary; you may now exit the window at any time.</p>',
+  choices: jsPsych.NO_KEYS
+};
+
+var completion = {
+  timeline: [completion_trial],
+  conditional_function: function(){
+    var attention_sum = jsPsych.data.get().filter({Stage: "round3_fail"}).select('attention_check').sum();
+    if (attention_sum == 2) {
+      return true
+    }
+    else {
+      return false
+    }
+  }
+}
+
+var completion_fail1 = {
+  timeline: [completion_fail1_trial],
+  conditional_function: function(){
+    var attention_sum = jsPsych.data.get().filter({Stage: "round3_fail"}).select('attention_check').sum();
+    if (attention_sum == 1) {
+      return true
+    }
+    else {
+      return false
+    }
+  }
+}
+
+timeline.push(completion, completion_fail1);
+
+function startExperiment(){
+  jsPsych.init({
+    timeline: timeline
+    // on_finish: function() {
+    //   jsPsych.data.get().localSave('csv','test_data.csv')
+    // }
+  });
+}
+  </script>
+</html>
