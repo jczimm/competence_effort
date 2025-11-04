@@ -980,7 +980,8 @@ timeline.push(completion, completion_fail1);
 
 function startExperiment(){
   jsPsych.init({
-    timeline: timeline.slice(305) // TEMP: cut to the chase for testing
+    timeline: timeline
+    // timeline: timeline.slice(305) // TEMP: cut to the chase for testing
     // on_finish: function() {
     //   jsPsych.data.get().localSave('csv','test_data.csv')
     // }
