@@ -921,7 +921,7 @@ function saveData_csv(name, data){
   xhr.open('POST', 'https://pipe.jspsych.org/api/data/');
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.setRequestHeader('Accept', '*/*');
-  xhr.send(JSON.stringify({experimentID: dataPipeExperimentId, filename: name, filedata: data}));
+  xhr.send(JSON.stringify({experimentID: dataPipeExperimentId, filename: name, data: data}));
 };
 
 // grab data before the end of the experiment
