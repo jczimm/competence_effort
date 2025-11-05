@@ -30,6 +30,8 @@
   <body></body>
   <script>
 
+  var isTesting = window.location.search.includes("TEST")
+
   var timeline = [];
 
   var all_images = [
@@ -310,7 +312,7 @@ var gap = {
   type: "html-keyboard-response",
   stimulus: " ",
   choices: jsPsych.NO_KEYS,
-  trial_duration: 1000
+  trial_duration: isTesting ? 0 : 1000
 }
 
 // comprehension check
@@ -983,8 +985,6 @@ var completion_fail1 = {
 }
 
 timeline.push(completion, completion_fail1);
-
-var isTesting = window.location.search.includes("TEST")
 
 function startExperiment(){
   jsPsych.init({
