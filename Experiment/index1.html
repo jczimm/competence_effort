@@ -70,12 +70,12 @@
 
   var subjectId =  jsPsych.randomization.randomID(12);
   var fullurl = window.location.href;
-  var mturkId = jsPsych.data.getURLVariable('workerId');
+  var prolificId = jsPsych.data.getURLVariable('PROLIFIC_PID');
   var expIndex = 'index1';
   jsPsych.data.addProperties({
     subjectId: subjectId,
     url: fullurl,
-    mturkId: mturkId,
+    prolificId: prolificId,
     expIndex: expIndex
   });
 
@@ -428,7 +428,7 @@ var instructions2 = {
   "<p style='font-size: 20px'><b><br> Gentle Reminder </b></p>"+
   "<p> To complete the full game and save your data, you need to advance to the completion code screen at the end of the game. </p>"+
   "<p> Please follow the instructions on the screen carefully. </p>"+
-  "<p> <b>There are a few attention checks throughout the game; your HIT may be rejected if you fail them.</b> </p>",
+  "<p> <b>There are a few attention checks throughout the game; your submission may be rejected if you fail them.</b> </p>",
   // page 2
   "<p> The game will take about 15 minutes to complete.</b></p>"+ // CHANGE HERE
   "<p> You will earn $2 for completing the game and a potential bonus payment up to $1.00. </p>"+ // CHANGE HERE
@@ -775,7 +775,7 @@ var new_contest = {
   var warning = {
     type: "html-keyboard-response",
     stimulus: "<p> <b>Oops you failed an attention check!</b> </p>"+
-    "<p> <b>We will have to reject your HIT if you fail another one.</b> </p>"+
+    "<p> <b>We will have to reject your submission if you fail another one.</b> </p>"+
     "<p> <b>Please pay more attention!</b> </p>",
     choices: jsPsych.NO_KEYS,
     trial_duration: 5000,
@@ -806,8 +806,8 @@ var new_contest = {
   var termination = {
     type: "html-keyboard-response",
     stimulus: "<p> <b>We are sorry that you failed all of our attention checks.</b> </p>"+
-    "<p> We will have to reject your HIT. </p>"+
-    "<p> If you do not want wish to be rejected, you can choose not to submit the HIT. </p>"+
+    "<p> We will have to reject your submission. </p>"+
+    "<p> If you do not want wish to be rejected, you can choose not to submit the submission. </p>"+
     "<p> Thank you for your time! </p>",
     choices: jsPsych.NO_KEYS
   }
@@ -840,7 +840,7 @@ var new_contest = {
 
   var end_comments = {
     type: 'survey-text',
-    questions: [{prompt: 'Optional question: We\'re always trying to improve. Please let us know if you have any comments.</br> Click \'Submit Answer\' to finish the game.', value: 'Comments'}],
+    questions: [{prompt: 'Optional question: We\'re always trying to improve. Please let us know if you have any comments. Please do not include any information that could be used to identify you.</br> Click \'Submit Answer\' to finish the game.', value: 'Comments'}],
     button_label: 'Submit Answer',
     on_finish: function(data) {
       var interaction_data = jsPsych.data.getInteractionData();
@@ -913,29 +913,34 @@ var new_contest = {
 timeline.push(display_bonus)
 
 // Save data to CSV
+var dataPipeExperimentId = 'tJbzEHIMowam';
 function saveData_csv(name, data){
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'save_data.php');
+  xhr.open('POST', 'https://pipe.jspsych.org/api/data/');
   xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.send(JSON.stringify({filename: name, filedata: data}));
+  xhr.setRequestHeader('Accept', '*/*');
+  xhr.send(JSON.stringify({experimentID: dataPipeExperimentId, filename: name, filedata: data}));
 };
 
 // grab data before the end of the experiment
 var save_data = {
   type: 'call-function',
-  func: function(){ saveData_csv(expIndex + '_' + subjectId + '_output', jsPsych.data.get().csv());
+  func: function(){ saveData_csv(expIndex + '_' + subjectId + '_output.csv', jsPsych.data.get().csv());
   },
   timing_post_trial: 0
 };
 timeline.push(save_data);
 
+var debriefing_html = "<p> The purpose of this study is to investigate how we perceive and reason about the abilities of people we could collaborate with. (Please do not share this information with other potential participants.)</p><hr>"
+
 // completion code
 var comp_code = "acattt5w8accb";
 var completion_trial = {
   type: 'html-keyboard-response',
-  stimulus: '<p> Your response has been recorded!</p>'+
+  stimulus: '<p> Your response has been recorded! Thank you for time participating in this study.</p>'+
+  debriefing_html+
   '<p> Your completion code is</p>' + comp_code +
-  '<p> Please copy this code into Mechanical Turk. You will not be be able to access this code after leaving this page!</p>'+
+  '<p> Please copy this code into Prolific. You will not be be able to access this code after leaving this page!</p>'+
   '<p> No further action is necessary; you may now exit the window at any time.</p>',
   choices: jsPsych.NO_KEYS
 };
@@ -943,9 +948,10 @@ var completion_trial = {
 var comp_code_fail1 = "1acattt5w8accb";
 var completion_fail1_trial = {
   type: 'html-keyboard-response',
-  stimulus: '<p> Your response has been recorded!</p>'+
+  stimulus: '<p> Your response has been recorded! Thank you for time participating in this study.</p>'+
+  debriefing_html+
   '<p> Your completion code is</p>' + comp_code_fail1 +
-  '<p> Please copy this code into Mechanical Turk. You will not be be able to access this code after leaving this page!</p>'+
+  '<p> Please copy this code into Prolific. You will not be be able to access this code after leaving this page!</p>'+
   '<p> No further action is necessary; you may now exit the window at any time.</p>',
   choices: jsPsych.NO_KEYS
 };
@@ -978,10 +984,11 @@ var completion_fail1 = {
 
 timeline.push(completion, completion_fail1);
 
+var isTesting = window.location.search.includes("TEST")
+
 function startExperiment(){
   jsPsych.init({
-    timeline: timeline
-    // timeline: timeline.slice(305) // TEMP: cut to the chase for testing
+    timeline: isTesting ? timeline.slice(305) : timeline
     // on_finish: function() {
     //   jsPsych.data.get().localSave('csv','test_data.csv')
     // }
