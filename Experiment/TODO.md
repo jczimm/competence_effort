@@ -13,7 +13,7 @@
     1. jczimm/memo-sandbox has my planned modeling approach, just missing solitary and compensatory models as of 2025-11-4
     2. xiang2023/writeup/index.qmd has my planned analysis (the one-sample t-test)
 
-- [ ] test datapipe basically
+- [x] test datapipe basically
 
 ## Pilot A
 
@@ -21,8 +21,12 @@ Pilot A is a pilot of your study with non-naive participants. The goals of Pilot
 
 - [ ] Collect "data" from you and/or your friends to guarantee that you are logging data correctly.
 - [ ] Get feedback on the paradigm by running it several times.
-- [ ] Code up your planned analyses (i.e. finish data-preprocessing) and confirm that you can run them on your data.
+- [ ] Code up your planned analyses (i.e. implement data-preprocessing per my sketch) and confirm that you can run them on your data.
 
 This assignment requires you to:
 
 - [ ] submit your rendered replication report with a link to your paradigm and with the limited data you collected analyzed via the confirmatory analyses.
+
+## When launching on Prolific
+
+Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
