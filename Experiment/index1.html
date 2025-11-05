@@ -312,7 +312,7 @@ var gap = {
   type: "html-keyboard-response",
   stimulus: " ",
   choices: jsPsych.NO_KEYS,
-  trial_duration: isTesting ? 0 : 1000
+  trial_duration: isTesting ? 10 : 1000
 }
 
 // comprehension check
@@ -462,7 +462,7 @@ var new_contest = {
     return "<p style='font-size:30px'><b> New Contest! </b></p>"
   },
   choices: jsPsych.NO_KEYS,
-  trial_duration: 3000,
+  trial_duration: isTesting ? 10 : 3000,
   on_finish: function(){
     var j = jsPsych.data.get().last(2).values()[0].j
     jsPsych.data.addDataToLastTrial({j: j})
@@ -780,7 +780,7 @@ var new_contest = {
     "<p> <b>We will have to reject your submission if you fail another one.</b> </p>"+
     "<p> <b>Please pay more attention!</b> </p>",
     choices: jsPsych.NO_KEYS,
-    trial_duration: 5000,
+    trial_duration: isTesting ? 10 : 5000,
     on_finish: function(){
       var j = jsPsych.data.get().last(2).values()[0].j
       jsPsych.data.addDataToLastTrial({already: 1, j: j, Stage: "warning"})
