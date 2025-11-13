@@ -73,11 +73,17 @@
   var subjectId =  jsPsych.randomization.randomID(12);
   var fullurl = window.location.href;
   var prolificId = jsPsych.data.getURLVariable('PROLIFIC_PID');
+  var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+  var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
   var expIndex = 'index1';
   jsPsych.data.addProperties({
     subjectId: subjectId,
     url: fullurl,
     prolificId: prolificId,
+    study_id: study_id,
+    session_id: session_id,
+    
     expIndex: expIndex
   });
 
@@ -875,19 +881,20 @@ var new_contest = {
       var bonus = (trial_outcome*trial_probability + (1-trial_outcome)*(100-trial_probability))/100;
       jsPsych.data.addDataToLastTrial({pick_contest: pick_contest, pick_round: pick_round, pick_side: pick_side, trial_probability: trial_probability, trial_outcome: trial_outcome, bonus: bonus})
 
+      var bonusString = bonus.toFixed(2);
       if (pick_round == 2) {
         if (pick_side == 0) {
         return  "<p> We randomly picked <b>Contest "+ pick_contest +", Round "+ pick_round +"</b> to calculate your bonus. </p>"+
         "<p> The outcome of Contestant "+ letters[pick_contest-1][0] +" on that round is "+ round2_outcomes[seq[pick_contest-1]][0] +"</span>. </p>"+
         "<p> The probability you entered was "+ trial_probability +". </p>"+
-        "<p><b> You won a bonus of $"+ bonus +"!</b></p>"+
+        "<p><b> You won a bonus of $"+ bonusString +"!</b></p>"+
         "<p> IMPORTANT: Please click 'Next' to complete the game.</p>"
         }
         else {
           return  "<p> We randomly picked <b>Contest "+ pick_contest +", Round "+ pick_round +"</b> to calculate your bonus. </p>"+
           "<p> The outcome of Contestant "+ letters[pick_contest-1][1] +" on that round is "+ round2_outcomes[seq[pick_contest-1]][1] +"</span>. </p>"+
           "<p> The probability you entered was "+ trial_probability +". </p>"+
-          "<p><b> You won a bonus of $"+ bonus +"!</b></p>"+
+          "<p><b> You won a bonus of $"+ bonusString +"!</b></p>"+
           "<p> IMPORTANT: Please click 'Next' to complete the game.</p>"
         }
       }
@@ -895,7 +902,7 @@ var new_contest = {
         return  "<p> We randomly picked <b>Contest "+ pick_contest +", Round "+ pick_round +"</b> to calculate your bonus. </p>"+
         "<p> The outcome of Contestant "+ letters[pick_contest-1][0] +" and "+ letters[pick_contest-1][1] +" on that round is "+ round3_outcomes[seq[pick_contest-1]] +"</span>. </p>"+
         "<p> The probability you entered was "+ trial_probability +". </p>"+
-        "<p><b> You won a bonus of $"+ bonus +"!</b></p>"+
+        "<p><b> You won a bonus of $"+ bonusString +"!</b></p>"+
         "<p> IMPORTANT: Please click 'Next' to complete the game. </p>"
       }
   },
@@ -987,12 +994,24 @@ var completion_fail1 = {
 timeline.push(completion, completion_fail1);
 
 function startExperiment(){
+  // if (prolificId) {
   jsPsych.init({
     timeline: isTesting ? timeline.slice(305) : timeline
     // on_finish: function() {
     //   jsPsych.data.get().localSave('csv','test_data.csv')
     // }
   });
+  // } else {
+  //   jsPsych.init({
+  //     timeline: [
+  //       {
+  //         type: 'html-keyboard-response',
+  //         stimulus: '<p>It seems you have not accessed this experiment through Prolific.</p><p>Please close this window and access the experiment through Prolific to ensure you are compensated for your time. Thank you!</p>',
+  //         choices: jsPsych.NO_KEYS
+  //       }
+  //     ]
+  //   })
+  // }
 }
   </script>
 </html>

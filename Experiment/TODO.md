@@ -29,4 +29,5 @@ This assignment requires you to:
 
 ## When launching on Prolific
 
-Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
+- [ ] Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
+- [ ] Actually add index.qmd so that going to ./xiang2023/ doesn't show participants the writeup (and ensure my link is always ..../xiang2023/writeup/ instead of just .../xiang2023/)
