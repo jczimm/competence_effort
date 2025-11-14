@@ -30,10 +30,13 @@ This assignment requires you to:
 ## When launching on Prolific
 
 - update payment rate from $2 to $3 to reflect Prolific requirement
-    - [x] in index1.html
-    - [x] in writeup/index.qmd
-    - [ ] in qmd file attached to prereg
-- [ ] implement changes to index1.html if needed to align with class guideline about whether we'll request return/reject ppl who fail both attention checks (see `termination` step, and elsewhere the string "reject" appears)
+  - [x] in index1.html
+  - [x] in writeup/index.qmd
+  - [x] in qmd file attached to prereg
+- implement changes to align with IRB guideline that we won't request return or reject ppl who fail both attention checks (see `termination` step, and elsewhere the string "reject" appears)
+  - [x] change index1.html (giving special completion code to people who fail both attention checks)
+  - [x] update this in writeup/index.qmd
+  - [ ] update this in qmd attached to prereg
 
 - [ ] Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
 - [ ] In the experiment, require prolificId to be supplied

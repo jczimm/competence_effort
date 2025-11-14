@@ -436,7 +436,7 @@ var instructions2 = {
   "<p style='font-size: 20px'><b><br> Gentle Reminder </b></p>"+
   "<p> To complete the full game and save your data, you need to advance to the completion code screen at the end of the game. </p>"+
   "<p> Please follow the instructions on the screen carefully. </p>"+
-  "<p> <b>There are a few attention checks throughout the game; your submission may be rejected if you fail them.</b> </p>",
+  "<p> <b>There are a few attention checks throughout the game; your submission may be unusable if you fail them.</b> </p>",
   // page 2
   "<p> The game will take about 15 minutes to complete.</b></p>"+ // CHANGE HERE
   "<p> You will earn $3 for completing the game and a potential bonus payment up to $1.00. </p>"+ // CHANGE HERE
@@ -783,7 +783,7 @@ var new_contest = {
   var warning = {
     type: "html-keyboard-response",
     stimulus: "<p> <b>Oops you failed an attention check!</b> </p>"+
-    "<p> <b>We will have to reject your submission if you fail another one.</b> </p>"+
+    "<p> <b>We will have to discard your data if you fail another one.</b> </p>"+
     "<p> <b>Please pay more attention!</b> </p>",
     choices: jsPsych.NO_KEYS,
     trial_duration: isTesting ? 10 : 5000,
@@ -811,14 +811,21 @@ var new_contest = {
     }
   }
 
+  var debriefing_html = "<p> The purpose of this study is to investigate how we perceive and reason about the abilities of people we could collaborate with. (Please do not share this information with other potential participants.)</p><hr>"
+
+  var comp_code_failtwice = 'CJUOZWLR'
   var termination = {
-    type: "html-keyboard-response",
-    stimulus: "<p> <b>We are sorry that you failed all of our attention checks.</b> </p>"+
-    "<p> We will have to reject your submission. </p>"+
-    "<p> If you do not want wish to be rejected, you can choose to return the submission. </p>"+
-    "<p> Thank you for your time! </p>",
+    type: 'html-keyboard-response',
+    stimulus:
+    "<p> <b>We are sorry that you failed all of our attention checks.</b> </p>"+
+    // "<p> We will have to discard your data. </p>"+
+    '<p> Your response has been recorded! Thank you for time participating in this study.</p>'+
+    debriefing_html+
+    '<p> Your completion code is</p>' + comp_code_failtwice +
+    '<p> Please copy this code into Prolific. You will not be be able to access this code after leaving this page!</p>'+
+    '<p> No further action is necessary; you may now exit the window at any time.</p>',
     choices: jsPsych.NO_KEYS
-  }
+  };
 
   var fail_twice = {
     timeline: [termination],
@@ -939,8 +946,6 @@ var save_data = {
   timing_post_trial: 0
 };
 timeline.push(save_data);
-
-var debriefing_html = "<p> The purpose of this study is to investigate how we perceive and reason about the abilities of people we could collaborate with. (Please do not share this information with other potential participants.)</p><hr>"
 
 // completion code
 var comp_code = "CPY2NU87";
