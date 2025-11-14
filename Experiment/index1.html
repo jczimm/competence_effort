@@ -73,16 +73,12 @@
   var subjectId =  jsPsych.randomization.randomID(12);
   var fullurl = window.location.href;
   var prolificId = jsPsych.data.getURLVariable('PROLIFIC_PID');
-  var study_id = jsPsych.data.getURLVariable('STUDY_ID');
-  var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+  var anonURL = fullurl.replaceAll(prolificId, 'REDACTED'); // quick & dirty way to redact the prolific id
 
   var expIndex = 'index1';
   jsPsych.data.addProperties({
     subjectId: subjectId,
-    url: fullurl,
-    prolificId: prolificId,
-    study_id: study_id,
-    session_id: session_id,
+    url: anonURL,
     
     expIndex: expIndex
   });

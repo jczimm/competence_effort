@@ -36,7 +36,7 @@ This assignment requires you to:
 - implement changes to align with IRB guideline that we won't request return or reject ppl who fail both attention checks (see `termination` step, and elsewhere the string "reject" appears)
   - [x] change index1.html (giving special completion code to people who fail both attention checks)
   - [x] update this in writeup/index.qmd
-  - [ ] update this in qmd attached to prereg
+  - [x] update this in qmd attached to prereg
 
 - [ ] Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
 - [ ] In the experiment, require prolificId to be supplied
