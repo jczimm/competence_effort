@@ -29,5 +29,13 @@ This assignment requires you to:
 
 ## When launching on Prolific
 
+- update payment rate from $2 to $3 to reflect Prolific requirement
+    - [x] in index1.html
+    - [x] in writeup/index.qmd
+    - [ ] in qmd file attached to prereg
+- [ ] implement changes to index1.html if needed to align with class guideline about whether we'll request return/reject ppl who fail both attention checks (see `termination` step, and elsewhere the string "reject" appears)
+
 - [ ] Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
+- [ ] In the experiment, require prolificId to be supplied
+- [ ] Enforce desktop-only?
 - [ ] Actually add index.qmd so that going to ./xiang2023/ doesn't show participants the writeup (and ensure my link is always ..../xiang2023/writeup/ instead of just .../xiang2023/)
