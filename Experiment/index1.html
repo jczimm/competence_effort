@@ -26,6 +26,8 @@
       width: 3.5em;
     }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsencrypt/bin/jsencrypt.min.js"></script>
   </head>
   <body></body>
   <script>
@@ -73,12 +75,35 @@
   var subjectId =  jsPsych.randomization.randomID(12);
   var fullurl = window.location.href;
   var prolificId = jsPsych.data.getURLVariable('PROLIFIC_PID');
+  var studyId = jsPsych.data.getURLVariable('STUDY_ID');
+  var sessionId = jsPsych.data.getURLVariable('SESSION_ID');
+
   var anonURL = fullurl.replaceAll(prolificId, 'REDACTED'); // quick & dirty way to redact the prolific id
+
+  var encryptedProlificId = (() => {
+    const crypt = new JSEncrypt();
+    const publicKeyString = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt3QXlcLjAvJ7FSRQJeBk
+d62x7OVX3w8lm/gk9XqtjOHn9uxDXYIPBkzKaYO/zau+bMWGe8PGS/fTo0/Gq0K0
+rHYftT7ATtVEivk/73ZNNpwjqDgM5H15qGx9IhzqofzyOsM8wkJtOJv/D5QJ20Dh
+O7CgjWt0dMgKxn0g48yCpfkq0o7JW4oVvwUegVe80VCoAzjuQ3t2xcIiCj1VMvtV
+X4/ghoXzkx4HF7/m2kAhKNGac2DKvMMCiYbwfJABKA7w0xYdgITC/heMIyQlPnOf
+/cdExbwP+xeAbfki7B2LWFTuqRc3x1+EYqLNdWAEuKGehKUcKhCjKzj4tQIjgF0M
+RQIDAQAB
+-----END PUBLIC KEY-----
+`;
+    crypt.setPublicKey(publicKeyString);
+    return crypt.encrypt(prolificId);
+  })();
 
   var expIndex = 'index1';
   jsPsych.data.addProperties({
     subjectId: subjectId,
     url: anonURL,
+
+    encryptedProlificId: encryptedProlificId,
+    studyId: studyId,
+    sessionId: sessionId,
     
     expIndex: expIndex
   });
@@ -824,7 +849,7 @@ var new_contest = {
   };
 
   var fail_twice = {
-    timeline: [termination],
+    timeline: [save_data, termination],
     conditional_function: function(){
       var count = jsPsych.data.get().filter({Stage: "round3_fail"}).select('count').sum();
       var attention = jsPsych.data.get().filter({Stage: "round3_fail"}).select('attention_check').sum();
