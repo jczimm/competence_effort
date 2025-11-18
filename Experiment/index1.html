@@ -32,7 +32,8 @@
   <body></body>
   <script>
 
-  var isTesting = window.location.search.includes("TEST")
+  var isTesting = window.location.search.includes("TEST");
+  var isMobile = /Mobi/i.test(window.navigator.userAgent);
 
   var timeline = [];
 
@@ -1020,24 +1021,36 @@ var completion_fail1 = {
 timeline.push(completion, completion_fail1);
 
 function startExperiment(){
-  // if (prolificId) {
+  if (isMobile && !isTesting) {
+    return jsPsych.init({
+      timeline: [
+        {
+          type: 'html-keyboard-response',
+          stimulus: '<p>It seems you have launched this experiment from a mobile device.</p><p>Please close this window and launch the experiment from a desktop device to complete this study. Thank you!</p>',
+          choices: jsPsych.NO_KEYS
+        }
+      ]
+    })
+  }
+  
+  if (!prolificId && !isTesting) {
+    return jsPsych.init({
+      timeline: [
+        {
+          type: 'html-keyboard-response',
+          stimulus: '<p>It seems you have not accessed this experiment through Prolific.</p><p>Please close this window and access the experiment through Prolific to ensure you are compensated for your time. Thank you!</p>',
+          choices: jsPsych.NO_KEYS
+        }
+      ]
+    })
+  }
+
   jsPsych.init({
     timeline: isTesting ? timeline.slice(305) : timeline
     // on_finish: function() {
     //   jsPsych.data.get().localSave('csv','test_data.csv')
     // }
   });
-  // } else {
-  //   jsPsych.init({
-  //     timeline: [
-  //       {
-  //         type: 'html-keyboard-response',
-  //         stimulus: '<p>It seems you have not accessed this experiment through Prolific.</p><p>Please close this window and access the experiment through Prolific to ensure you are compensated for your time. Thank you!</p>',
-  //         choices: jsPsych.NO_KEYS
-  //       }
-  //     ]
-  //   })
-  // }
 }
   </script>
 </html>

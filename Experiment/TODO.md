@@ -38,7 +38,7 @@ This assignment requires you to:
   - [x] update this in writeup/index.qmd
   - [x] update this in qmd attached to prereg
 
-- [ ] Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
-- [ ] In the experiment, require prolificId to be supplied
-- [ ] Enforce desktop-only?
-- [ ] Actually add index.qmd so that going to ./xiang2023/ doesn't show participants the writeup (and ensure my link is always ..../xiang2023/writeup/ instead of just .../xiang2023/)
+- [x] Don't forget ?PROLIFIC_PID=... ! and maybe also do an auto-redirect instead of manual entry of completion code
+- [x] In the experiment, require prolificId to be supplied
+- [x] Enforce desktop-only?
+- [x] Actually add index.qmd so that going to ./xiang2023/ doesn't show participants the writeup (and ensure my link is always ..../xiang2023/writeup/ instead of just .../xiang2023/)
