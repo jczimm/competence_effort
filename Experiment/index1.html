@@ -109,6 +109,24 @@ RQIDAQAB
     expIndex: expIndex
   });
 
+  // Save data to CSV
+  var dataPipeExperimentId = 'tJbzEHIMowam';
+  function saveData_csv(name, data){
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://pipe.jspsych.org/api/data/');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', '*/*');
+    xhr.send(JSON.stringify({experimentID: dataPipeExperimentId, filename: name, data: data}));
+  };
+
+  // grab data before the end of the experiment
+  var save_data = {
+    type: 'call-function',
+    func: function(){ saveData_csv(expIndex + '_' + subjectId + '_output.csv', jsPsych.data.get().csv());
+    },
+    timing_post_trial: 0
+  };
+
   // Fullscreen
   timeline.push({
     type: "fullscreen",
@@ -324,13 +342,14 @@ var instructions = {
       "<p> They also know how heavy the box is. </p>",
       // page 6
       "<p> Also remember that <b>the box is always the same</b>. </p>"+
-      "<p> Different pairs of contestants will come in to lift the box; <br>each pair will play the game for three consecutive rounds. </p>"+
+      "<p> For each contest, a new pair of contestants will come in to lift the box; <br>each pair will play the game for three consecutive rounds. </p>"+
       "<p> <b>If the contestant does not feel the prize is worth their effort, they might not lift the box even if they are strong enough to do so.</b> </p>"+
       "<p> <b>Note that <u>effort is costly</u>; If the contestant can lift the box with 50% effort, they would not exert more effort than needed.</b> </p>",
       // page 7
       "<p> If you understood the rules, click 'Next' to go to the comprehension check. </p>"+
       "<p> Otherwise, click 'Previous' to view the instructions again. </p>"+
-      "<p> If you don't get the comprehension questions correct, you can't move on. </p>"
+      "<p> If you don't get the comprehension questions correct, you can't move on. </p>"+
+      `<p><b> You will have ${1 + MAX_COMPREHENSION_RETRIES} chances to complete the comprehension questions correctly before we ask you to return your submission, per Prolific guidelines.</b></p>`
       ],
   show_clickable_nav: true,
   allow_backward: true
@@ -344,6 +363,9 @@ var gap = {
 }
 
 // comprehension check
+
+var comprehension_retries = 0;
+var MAX_COMPREHENSION_RETRIES = 1;
 
 var choices_1 = [
   "It consists of multiple contests, each contest with one round.",
@@ -389,12 +411,27 @@ var comprehension = {
 
 var fail_page = {
   type: "html-button-response",
-  stimulus: "<p> Oops! You did not pass the comprehension check.</p>",
+  stimulus: `<p> Oops! You did not pass the comprehension check. <b>Please note that you have only ${MAX_COMPREHENSION_RETRIES - comprehension_retries} attempt(s) left.</b> </p>`,
   choices: ['<p style="font-size: 20px"><b> Try again </b></p>', '<p style="font-size: 20px"><b> View instructions again </b></p>']
 };
 
+
+var comp_final_fail_page = {
+  type: "html-keyboard-response",
+  stimulus: `<p> Sorry! You did not pass the comprehension check after ${1 + MAX_COMPREHENSION_RETRIES} attempts.</p>` +
+    '<p> Unfortunately, we are unable to proceed. Thank you for your time! </p>' +
+    '<p> Please <b>return your submission now</b> by closing this study and clicking <b>\'Cancel participation\' on Prolific</b>. </p>',
+  choices: jsPsych.NO_KEYS
+};
+var comp_final_fail = {
+  timeline: [save_data, comp_final_fail_page],
+  conditional_function: function() {
+    return comprehension_retries >= MAX_COMPREHENSION_RETRIES
+  }
+}
+
 var fail = {
-  timeline: [fail_page],
+  timeline: [comp_final_fail, fail_page],
   conditional_function: function(){
     var ans1 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q0;
     var ans2 = JSON.parse(jsPsych.data.getLastTrialData().values()[0].responses).Q1;
@@ -444,6 +481,7 @@ var comprehension_again = {
       return false;
     }
     else {
+      comprehension_retries += 1;
       return true;
     }
   }
@@ -950,23 +988,6 @@ var new_contest = {
   };
 timeline.push(display_bonus)
 
-// Save data to CSV
-var dataPipeExperimentId = 'tJbzEHIMowam';
-function saveData_csv(name, data){
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'https://pipe.jspsych.org/api/data/');
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.setRequestHeader('Accept', '*/*');
-  xhr.send(JSON.stringify({experimentID: dataPipeExperimentId, filename: name, data: data}));
-};
-
-// grab data before the end of the experiment
-var save_data = {
-  type: 'call-function',
-  func: function(){ saveData_csv(expIndex + '_' + subjectId + '_output.csv', jsPsych.data.get().csv());
-  },
-  timing_post_trial: 0
-};
 timeline.push(save_data);
 
 // completion code
